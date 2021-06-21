@@ -18,18 +18,30 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
+import com.tech.rukesh.techlearn.dto.TechnologyCommentsDto;
 import com.tech.rukesh.techlearn.dto.TechnoloyDto;
 import com.tech.rukesh.techlearn.exception.NoSuchTechnoloyExistsException;
 import com.tech.rukesh.techlearn.exception.TechnoloyAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.TechnoloyException;
+import com.tech.rukesh.techlearn.model.Comments;
 import com.tech.rukesh.techlearn.model.StatusMain;
 import com.tech.rukesh.techlearn.model.Technoloy;
+import com.tech.rukesh.techlearn.model.UserRegistration;
+import com.tech.rukesh.techlearn.repository.CommentsRepository;
 import com.tech.rukesh.techlearn.repository.StatusMainRepository;
 import com.tech.rukesh.techlearn.repository.TechnologyRepository;
+import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
 import com.tech.rukesh.techlearn.util.RandomCodeGenerator;
+import com.tech.rukesh.techlearn.util.StatusMap;
+
+import jdk.jshell.spi.ExecutionControl.UserException;
+
+
 
 
 @Transactional
@@ -45,6 +57,19 @@ public class TechnoloyService {
 	@Autowired
 	private StatusMainRepository statusMainRepository;
 	
+	@Autowired
+	private CommentsRepository  commentsRepository;
+	
+	@Autowired
+	private UserRegistrationRepository userRegistrationRepository;
+	
+	@Autowired
+	private MailManagerService mailManagerService;
+	
+	
+	
+	@Value("${mail.fromAddress}")
+	private String fromAddress;
 	
 	final static Logger logger = LoggerFactory.getLogger(TechnoloyService.class);
 	
@@ -53,24 +78,37 @@ public class TechnoloyService {
 	 * @param technoloyDto
 	 * @return
 	 */
-	public TechnoloyDto saveTechnology(TechnoloyDto technoloyDto)
+	public String saveTechnology(TechnoloyDto technoloyDto)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+		
+		Optional<Technoloy> techopt = technologyRepository.findByName(technoloyDto.getName());
 
 		Technoloy techsave=null;
-		Optional<Technoloy> techopt = technologyRepository.findByName(technoloyDto.getName());
+				
 		if(techopt.isPresent())
 		throw new TechnoloyAlreadyExistsException("TechnoloyAlreadyExists");
 		else
-		techsave = mapFromDto(technoloyDto);
+		techsave = mapFromTechnoloyDto(technoloyDto);	
 		try {
 		technologyRepository.save(techsave);
 		}catch (Exception e) {
 		  throw new TechnoloyException(e.getMessage());
 		}
+		
+		
+		MailAcknowledgementDto mailAcknowledgementDto = new MailAcknowledgementDto();
+		mailAcknowledgementDto.setUserId(techsave.getUserRegistration().getUserId());
+		mailAcknowledgementDto.setToAddress(techsave.getUserRegistration().getEmail());
+		mailAcknowledgementDto.setTypeOfMail("TechnologyCreation");
+		mailAcknowledgementDto.setSubject("New Technology Created");
+		mailAcknowledgementDto.setFromAddress(fromAddress);
+		
+		mailManagerService.sendTechnologyAcknowledgeRelatedMail(mailAcknowledgementDto,techsave);
+		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		return mapToDto(techsave);
+		return "technology saved Successfully";
 	}
 	
 	
@@ -110,31 +148,85 @@ public class TechnoloyService {
 	 * @param technoloyDto
 	 * @return
 	 */
-	public TechnoloyDto updateTechnology(TechnoloyDto technoloyUpdateDto)
+	public String updateTechnology(TechnologyCommentsDto TechnologyCommentsUpdateDto)
 	{		
-		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		TechnoloyDto TechnoloyDtoDB = getTechnologyById(technoloyUpdateDto.getId());
-		Optional<StatusMain> statusMain  = statusMainRepository.findById(technoloyUpdateDto.getStatusId());	
-		
-		Technoloy technology =new Technoloy();
-		technology.setId(TechnoloyDtoDB.getId());
-		technology.setStatusMain(statusMain.get());
-		technology.setModifiedDate(new Date(System.currentTimeMillis()));
-		technology.setCode(TechnoloyDtoDB.getCode());
-		technology.setCreatedDate(TechnoloyDtoDB.getCreatedDate());
-		technology.setName(TechnoloyDtoDB.getName());
-		technology.setDescription(TechnoloyDtoDB.getDescription());
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
+		Technoloy  techUpdate = mapFromTechnologyCommentsDto(TechnologyCommentsUpdateDto);
+		String Status="";
 		try {
-		technology = technologyRepository.save(technology);	
+			techUpdate = technologyRepository.save(techUpdate);	
 		}catch (Exception e) {
 			throw new TechnoloyException(e.getMessage());
 		}
+		
+		
+		Comments comments = new Comments();
+		comments.setComment(TechnologyCommentsUpdateDto.getComment());
+		comments.setCreatedDate(new Date(System.currentTimeMillis()));
+		comments.setTechnoloy(techUpdate);
+		comments.setUserRegistration(techUpdate.getUserRegistration());
+		
+		MailAcknowledgementDto mailAcknowledgementDto = new MailAcknowledgementDto();
+		mailAcknowledgementDto.setUserId(techUpdate.getUserRegistration().getUserId());
+		mailAcknowledgementDto.setToAddress(techUpdate.getUserRegistration().getEmail());
+	    if(techUpdate.getStatusMain().getId()==StatusMap.Closed) {
+		mailAcknowledgementDto.setTypeOfMail("TechnologyClosed");
+		mailAcknowledgementDto.setSubject("Technology Closed");
+		Status = "technology Closed Successfully";
+	    }else {
+	    	mailAcknowledgementDto.setTypeOfMail("TechnologyUpdated");
+			mailAcknowledgementDto.setSubject("Technology Updated");
+			Status = "technology updated Successfully";
+	    }
+		mailAcknowledgementDto.setFromAddress(fromAddress);
+		
+		mailManagerService.sendTechnologyAcknowledgeRelatedMail(mailAcknowledgementDto,techUpdate);
+
+		
+		try {
+		  commentsRepository.save(comments);
+		}catch (Exception e) {
+			throw new TechnoloyException(e.getMessage());
+		}
+		
 		logger.info(" End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return mapToDto(technology);
+		return Status;
 
 	}
 
    
+	/**
+	 * @param technologyCommentsUpdateDto
+	 * @return
+	 */
+	private Technoloy mapFromTechnologyCommentsDto(TechnologyCommentsDto technologyCommentsUpdateDto) {
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());			
+		
+		TechnoloyDto TechnoloyDtoDB = getTechnologyById(technologyCommentsUpdateDto.getId());
+		Optional<StatusMain> statusMain  = statusMainRepository.findById(technologyCommentsUpdateDto.getStatusId());	
+		
+		Optional<UserRegistration> userOptional =  userRegistrationRepository.findById(TechnoloyDtoDB.getUserId());
+		
+		String totaltimeString = calculateTotalTime(TechnoloyDtoDB.getCreatedDate(),technologyCommentsUpdateDto.getExpectedCompletionDate());	
+       	
+		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
+
+		return Technoloy.builder()
+				.id(TechnoloyDtoDB.getId())
+				.code(TechnoloyDtoDB.getCode())
+				.name(technologyCommentsUpdateDto.getName())
+				.description(technologyCommentsUpdateDto.getDescription())
+				.createdDate(TechnoloyDtoDB.getCreatedDate())
+				.expectedCompletionDate(technologyCommentsUpdateDto.getExpectedCompletionDate())
+				.totalTimeToComplete(totaltimeString)
+				.modifiedDate(new Date(System.currentTimeMillis()))
+				.statusMain(statusMain.get())
+				.userRegistration(userOptional.get())
+		        .build();	
+	   
+	}
+
+
 	/**
     * @author Rukesh
     * @param techsave
@@ -152,6 +244,7 @@ public class TechnoloyService {
 				.expectedCompletionDate(techsave.getExpectedCompletionDate())
 				.totalTimeToComplete(techsave.getTotalTimeToComplete())
 				.statusId(techsave.getStatusMain().getId())
+				.userId(techsave.getUserRegistration().getUserId())
 				.build();
 	}
 
@@ -161,36 +254,52 @@ public class TechnoloyService {
 	 * @param technoloyDto
 	 * @return
 	 */
-	public Technoloy mapFromDto(TechnoloyDto technoloyDto) {
+	public Technoloy mapFromTechnoloyDto(TechnoloyDto technoloyDto) {
 		
-		Optional<StatusMain> statusMain  = statusMainRepository.findById(technoloyDto.getStatusId());		
-		calculateTotalTime(technoloyDto);
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
+	
+		Date createdDate =new Date(System.currentTimeMillis());
+		Date modifieddate = new Date(System.currentTimeMillis());
+		Date ExpectedCompletionDate  =  technoloyDto.getExpectedCompletionDate();
+		String totaltimeString = calculateTotalTime(createdDate,ExpectedCompletionDate);
+		
+		Optional<UserRegistration> userOptional =  userRegistrationRepository.findById(technoloyDto.getUserId());
+		
+		Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(technoloyDto.getStatusId());	
+		
+		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
+
 		return Technoloy.builder()
 				.name(technoloyDto.getName())
 				.description(technoloyDto.getDescription())
-				.statusMain(statusMain.get())
-				.createdDate(new Date(System.currentTimeMillis()))
-				.modifiedDate(new Date(System.currentTimeMillis()))
-				.expectedCompletionDate(technoloyDto.getExpectedCompletionDate())
-				.totalTimeToComplete(calculateTotalTime(technoloyDto))
-				.code(randomCodeGenerator.generateRandomCode()).build();
+				.code(randomCodeGenerator.generateRandomCode())
+				.createdDate(createdDate)
+				.modifiedDate(modifieddate)
+				.expectedCompletionDate(ExpectedCompletionDate)
+				.totalTimeToComplete(totaltimeString)
+				.userRegistration(userOptional.get())
+				.statusMain(statusMainOpt.get())
+				.build();
 				
 				
 	}
+	
+	
+	
 
 
 	/**
 	 * @param technoloyDto
 	 */
-	private String calculateTotalTime(TechnoloyDto technoloyDto) {
+	private String calculateTotalTime(Date startDate , Date endDate) {
 		 logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		 LocalDate now = new Date(System.currentTimeMillis()).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		 LocalDate ExpectedCompletionDate =  technoloyDto.getExpectedCompletionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		 double totalDays = (double) ChronoUnit.DAYS.between(now,ExpectedCompletionDate);
+		 LocalDate startdate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		 LocalDate ExpectedCompletionDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		 double totalDays = (double) ChronoUnit.DAYS.between(startdate,ExpectedCompletionDate);
 		 String totalDaysStr="";
-		 if(totalDays>366) {
+		 if(totalDays>365) {
 			 totalDays = totalDays/366;
-			 DecimalFormat f = new DecimalFormat("##.0");
+			 DecimalFormat f = new DecimalFormat("#.#");
 			 f.format(totalDays);
 			 if(totalDays==366)
 			 totalDaysStr+=totalDays+" Year";

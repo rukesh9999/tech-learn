@@ -17,10 +17,23 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * @author Rukesh
  *
  */
+@Builder
+@ToString
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name ="comments",uniqueConstraints = {
 @UniqueConstraint(columnNames ="id")

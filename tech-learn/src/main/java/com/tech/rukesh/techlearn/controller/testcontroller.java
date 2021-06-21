@@ -20,7 +20,7 @@ public class testcontroller {
 	@GetMapping("/view")
 	public String view()
 	{
-		return "NewAccountCreatedmailTemplate.html";
+		return "TechnologyClosedMailTemplate";
 	}
-
+	
 }

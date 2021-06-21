@@ -73,6 +73,10 @@ public class Technoloy {
     @JoinColumn(name="statusId",referencedColumnName = "id")
     private StatusMain statusMain;
     
+    @ManyToOne(targetEntity=UserRegistration.class,cascade =CascadeType.ALL,fetch =FetchType.EAGER)
+    @JoinColumn(name="CreatedBy",referencedColumnName ="user_id")
+    private UserRegistration userRegistration;
+    
     
 	
 }

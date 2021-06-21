@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tech.rukesh.techlearn.dto.TechnologyCommentsDto;
 import com.tech.rukesh.techlearn.dto.TechnoloyDto;
+import com.tech.rukesh.techlearn.repository.CommentsRepository;
 import com.tech.rukesh.techlearn.service.TechnoloyService;
 
 import lombok.RequiredArgsConstructor;
@@ -36,13 +38,14 @@ public class TechnoloyController {
 	private TechnoloyService technoloyService;
 	
 	
+	
 	@PostMapping("/save")
-	public ResponseEntity<TechnoloyDto> saveTechnology(@Valid @RequestBody TechnoloyDto technoloyDto)
+	public ResponseEntity<String> saveTechnology(@Valid @RequestBody TechnoloyDto technoloyDto)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		TechnoloyDto techDto = technoloyService.saveTechnology(technoloyDto);	
+		String status = technoloyService.saveTechnology(technoloyDto);	
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<TechnoloyDto>(techDto,HttpStatus.OK);		
+		return new ResponseEntity<String>(status,HttpStatus.OK);		
 	}
 	
 	
@@ -56,6 +59,7 @@ public class TechnoloyController {
 
 	}
 	
+	
 	@GetMapping("/get/{id}")
 	public ResponseEntity<TechnoloyDto> getTechnologyById(@PathVariable("id")Integer id)
 	{
@@ -67,12 +71,12 @@ public class TechnoloyController {
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<TechnoloyDto> updateTechnlogy(@Valid @RequestBody TechnoloyDto technoloyDto)
+	public ResponseEntity<String> updateTechnlogy(@Valid @RequestBody TechnologyCommentsDto technologyCommentsDto)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
-		TechnoloyDto techDto = technoloyService.updateTechnology(technoloyDto);		
+		String status = technoloyService.updateTechnology(technologyCommentsDto);		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<TechnoloyDto>(techDto,HttpStatus.OK);
+		return new ResponseEntity<String>(status,HttpStatus.OK);
 
 	}
 	

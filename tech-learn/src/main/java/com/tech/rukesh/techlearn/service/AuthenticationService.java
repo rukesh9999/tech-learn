@@ -54,7 +54,7 @@ public class AuthenticationService {
 		Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(userRegistrationDto.getEmail());
 		if(optUser.isPresent())
 		throw new UserAlreadyExistsException("UserAlreadyExists");
-		UserRegistration userRegistration = mapFromDto(userRegistrationDto);
+		UserRegistration userRegistration = mapFromUserRegistrationDto(userRegistrationDto);
 		userRegistration.setPassword(passwordGenerator.generatePassword());
 		try {
 		    userRegistrationRepository.save(userRegistration);
@@ -62,13 +62,14 @@ public class AuthenticationService {
 			throw new UserRegistrationException(e.getMessage());
 		}
 		
+		
 		MailAcknowledgementDto mailAcknowledgementDto = new MailAcknowledgementDto();
 		mailAcknowledgementDto.setUserId(userRegistration.getUserId());
 		mailAcknowledgementDto.setToAddress(userRegistration.getEmail());
 		mailAcknowledgementDto.setTypeOfMail("AccountCreation");
 		mailAcknowledgementDto.setSubject("New Account Created");
 		mailAcknowledgementDto.setFromAddress(fromAddress);
-		mailManagerService.sendAcknowledgeMail(mailAcknowledgementDto);
+		mailManagerService.sendAccountCreatedAcknowledgeMail(mailAcknowledgementDto);
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
@@ -80,7 +81,7 @@ public class AuthenticationService {
 	
 	
 	
-	public UserRegistration mapFromDto(UserRegistrationDto userRegistrationDto)
+	public UserRegistration mapFromUserRegistrationDto(UserRegistrationDto userRegistrationDto)
 	{
 		return UserRegistration.builder()
 				.firstName(userRegistrationDto.getFirstName())

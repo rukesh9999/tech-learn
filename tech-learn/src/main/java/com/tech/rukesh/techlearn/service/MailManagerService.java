@@ -22,6 +22,7 @@ import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.model.MailAcknowledgement;
+import com.tech.rukesh.techlearn.model.Technoloy;
 import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.MailAcknowledgementRepository;
 import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
@@ -52,26 +53,51 @@ public class MailManagerService {
 	
 	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
 
-	@Async
-	public Boolean sendAcknowledgeMail(MailAcknowledgementDto mailAcknowledgementDto)
+	
+	public Boolean sendAccountCreatedAcknowledgeMail(MailAcknowledgementDto mailAcknowledgementDto)
 	{
-		Boolean status=false;
-		
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		String html = mailBuilder.build(mailAcknowledgementDto.getUserId());
+
+		Boolean status=false;	
+		String  html = mailBuilder.buildRegistration(mailAcknowledgementDto.getUserId());
 		mailAcknowledgementDto.setBody(html);
 		this.saveMailDetailsBeforeSend(mailAcknowledgementDto);
+		this.sendMail(mailAcknowledgementDto);	
 		
+		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+        return status;
+	}
+	
+	
+	
+	public Boolean sendTechnologyAcknowledgeRelatedMail(MailAcknowledgementDto mailAcknowledgementDto,Technoloy technoloy)
+	{
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+		String html=mailBuilder.buildStatusUpdate(technoloy,mailAcknowledgementDto.getTypeOfMail(),mailAcknowledgementDto.getUserId());
 		
+		mailAcknowledgementDto.setBody(html);
+		this.saveMailDetailsBeforeSend(mailAcknowledgementDto);
+		Boolean status = this.sendMail(mailAcknowledgementDto);
 		
+		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+        return status;
+	}
+	
+	
+	 @Async
+	 public Boolean  sendMail(MailAcknowledgementDto mailAcknowledgementDto)
+	 {
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+
+		Boolean status=false;
+
 		MimeMessagePreparator mimeMessagePreparator = mimeMessage-> {
 			
-		
 			 MimeMessageHelper mimemessagehelper = new MimeMessageHelper(mimeMessage);
 			 mimemessagehelper.setFrom(mailAcknowledgementDto.getFromAddress());
 			 mimemessagehelper.setTo(mailAcknowledgementDto.getToAddress());
 			 mimemessagehelper.setSubject(mailAcknowledgementDto.getSubject());
-			 mimemessagehelper.setText(html,true);
+			 mimemessagehelper.setText(mailAcknowledgementDto.getBody(),true);
 						
 		};
 		
@@ -88,8 +114,8 @@ public class MailManagerService {
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
        return status;
 	}
-	
-	
+	 
+	 
 	
 	public void saveMailDetailsBeforeSend(MailAcknowledgementDto mailAcknowledgementDto)
 	{
@@ -108,8 +134,6 @@ public class MailManagerService {
 	public MailAcknowledgement mapFromDto(MailAcknowledgementDto mailAcknowledgementDto)
 	{
 		Optional<UserRegistration> optUser = userRegistrationRepository.findById(mailAcknowledgementDto.getUserId());
-		if(!optUser.isPresent())
-		throw new NoSuchUserExistsException("UserAlreadyExists");
 		
 		return MailAcknowledgement.builder()
 				.fromAddress(mailAcknowledgementDto.getFromAddress())

@@ -18,16 +18,19 @@
 </head>
 <body>
 <div class="container text-white customcss">
-<p>Hi  <span th:text="${firstName}"/> <span th:text="${lastName}" /></P>
-<p>You have been successfully Registered with Tech-App. Your Account Details as follows</p>
-<p class="ml-5 " th:text="${'Email  :  '+email}"></P>
-<p class="ml-5" th:text="${'password  :  '+password}"></p>
+<p>Dear  <span th:text="${firstName}"/> <span th:text="${lastName}" /></P>
+<p>Your Technology  has been Closed . Your Closed Technology  Details as follows</p>
+<p class="ml-5 " th:text="${'code  :  '+code}"></P>
+<p class="ml-5" th:text="${'name  :  '+name}"></p>
+<p class="ml-5 " th:text="${'description  :  '+description}"></P>
+<p class="ml-5 " th:text="${'totaltimetocomplete  :  '+totaltimetocomplete}"></P>
+<p class="ml-5 " th:text="${'status  :  '+status}"></P>
+<p class="ml-5 " th:text="${'comments  :  '+comments}"></P>
 <p class="ml-5">login Url : <a th:href="${url}">www.desc.com<a></P>
 <p>
 
 Regards,</p>
 <p>Tech-learn</p>
 </div>
-<span th:text="${message}"></span>
 </body>
 </html>
