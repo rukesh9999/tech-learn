@@ -10,14 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jms.JmsProperties.AcknowledgeMode;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import com.tech.rukesh.techlearn.controller.TechnoloyController;
-import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
-import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.model.Comments;
 import com.tech.rukesh.techlearn.model.StatusMain;
 import com.tech.rukesh.techlearn.model.Technoloy;

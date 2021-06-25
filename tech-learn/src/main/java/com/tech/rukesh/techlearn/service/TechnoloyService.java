@@ -1,27 +1,35 @@
 package com.tech.rukesh.techlearn.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.sql.Connection;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.util.ResourceUtils;
 
+import com.lowagie.text.pdf.codec.Base64.InputStream;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.dto.TechnologyCommentsDto;
 import com.tech.rukesh.techlearn.dto.TechnoloyDto;
@@ -39,13 +47,23 @@ import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
 import com.tech.rukesh.techlearn.util.RandomCodeGenerator;
 import com.tech.rukesh.techlearn.util.StatusMap;
 
-import jdk.jshell.spi.ExecutionControl.UserException;
+import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
 
 
 
 
 @Transactional
 @Service
+@RequiredArgsConstructor
 public class TechnoloyService {
 
 	@Autowired
@@ -331,6 +349,102 @@ public class TechnoloyService {
 	   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		return totalDaysStr;
+	}
+
+
+	
+	
+
+	public void generateReports(String format,HttpServletResponse response,HttpServletRequest request) {
+		
+		
+		 JasperPrint jasperPrint=null;
+		 String fileName="listoftechnologies";
+		 String folderName="";
+		 String finalPath="";
+		 
+		try {
+			
+			String path = request.getContextPath();
+			folderName=path.trim()+"/exportdoc/".trim();
+			File destinationFolder =new File(folderName);
+			if(!destinationFolder.exists()) {
+			destinationFolder.mkdir();	
+			}else {
+			  File[] files = destinationFolder.listFiles();
+			  for(File file: files)
+			  {
+				 file.delete(); 
+			  }
+			}
+			
+			finalPath+=folderName.trim()+fileName.trim()+".".trim()+format.trim();
+			
+			
+			List<TechnoloyDto> listoftechnologies  =  getAllTechnologies();
+			File file =  ResourceUtils.getFile("classpath:technologies.jrxml");
+			JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+			JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(listoftechnologies);
+            Map<String, Object> parameters  = new HashMap<>();
+            parameters.put("createdBy", "rukesh");
+            jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+            
+               if(format.equalsIgnoreCase("pdf")) {
+            	   
+        		response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
+        		response.setContentType("application/pdf");
+        		
+        		JasperExportManager.exportReportToPdfFile(jasperPrint, finalPath);;
+        		
+        		}else if(format.equalsIgnoreCase("csv"))
+        		{
+        			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
+        			response.setContentType("application/x-csv");
+        		}
+        		else if(format.equalsIgnoreCase("doc") || format.equalsIgnoreCase("docx"))
+        		{
+        			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
+        			response.setContentType("application/msword");
+        		}else if(format.equalsIgnoreCase("xls") || format.equalsIgnoreCase("xlsx"))
+        		{
+        			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
+        			response.setContentType("application/ms-excel");
+        			
+        		}
+        		else if(format.equalsIgnoreCase("xml"))
+        		{
+        			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
+        			response.setContentType("application/xml");
+        			JasperExportManager.exportReportToXmlFile(jasperPrint, finalPath,false);
+        		}
+        		else if(format.equalsIgnoreCase("html"))
+        		{
+        			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
+        			response.setContentType("application/TEXT_HTML");
+        			JasperExportManager.exportReportToHtmlFile(jasperPrint, finalPath);
+        		}
+               
+                FileInputStream fileInputStream =new FileInputStream(new File(finalPath));
+                
+                byte[] bytes =new byte[16384];
+                int size=0;
+                while((size=fileInputStream.read(bytes))!=-1)
+                {
+                	response.getOutputStream().write(bytes, 0, size);
+                }
+                
+                
+               
+               
+		} catch (JRException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		
 	}
 
 

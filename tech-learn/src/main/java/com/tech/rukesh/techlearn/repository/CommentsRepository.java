@@ -4,8 +4,6 @@
 package com.tech.rukesh.techlearn.repository;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.tech.rukesh.techlearn.model.Comments;

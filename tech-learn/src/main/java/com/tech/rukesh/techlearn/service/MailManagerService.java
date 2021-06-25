@@ -5,8 +5,6 @@ package com.tech.rukesh.techlearn.service;
 
 import java.util.Optional;
 
-import javax.mail.internet.MimeMessage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tech.rukesh.techlearn.controller.TechnoloyController;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
-import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
-import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.model.MailAcknowledgement;
 import com.tech.rukesh.techlearn.model.Technoloy;
 import com.tech.rukesh.techlearn.model.UserRegistration;

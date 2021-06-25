@@ -5,12 +5,16 @@ package com.tech.rukesh.techlearn.controller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,13 +23,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.function.ServerRequest.Headers;
 
 import com.tech.rukesh.techlearn.dto.TechnologyCommentsDto;
 import com.tech.rukesh.techlearn.dto.TechnoloyDto;
-import com.tech.rukesh.techlearn.repository.CommentsRepository;
 import com.tech.rukesh.techlearn.service.TechnoloyService;
 
 import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.JasperPrint;
 
 @RequiredArgsConstructor
 @RequestMapping("/technology")
@@ -78,6 +83,17 @@ public class TechnoloyController {
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		return new ResponseEntity<String>(status,HttpStatus.OK);
 
+	}
+	
+	@GetMapping("/generate/{format}")
+	public void generateReports(@PathVariable("format") String format,HttpServletResponse response,HttpServletRequest request) {
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
+		
+		technoloyService.generateReports(format,response,request);
+		
+		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+		
+		
 	}
 	
 }
