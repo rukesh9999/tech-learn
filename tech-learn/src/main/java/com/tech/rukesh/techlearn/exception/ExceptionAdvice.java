@@ -85,8 +85,27 @@ public class ExceptionAdvice {
 		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
 	}
 	
+
+	@ExceptionHandler(InvalidFormatException.class)
+	public ResponseEntity<ErrorDto> handleInvalidFormatException(InvalidFormatException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
 	
+	@ExceptionHandler(TechLearnException.class)
+	public ResponseEntity<ErrorDto> handleTechLearnException(TechLearnException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
 	
+	@ExceptionHandler(NoSuchRefreshTokenException.class)
+	public ResponseEntity<ErrorDto> handleNoSuchRefreshTokenException(NoSuchRefreshTokenException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
 	
 	
 }

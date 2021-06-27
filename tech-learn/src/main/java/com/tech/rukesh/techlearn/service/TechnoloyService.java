@@ -32,7 +32,8 @@ import org.springframework.util.ResourceUtils;
 import com.lowagie.text.pdf.codec.Base64.InputStream;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.dto.TechnologyCommentsDto;
-import com.tech.rukesh.techlearn.dto.TechnoloyDto;
+import com.tech.rukesh.techlearn.dto.TechnoloyRequest;
+import com.tech.rukesh.techlearn.exception.InvalidFormatException;
 import com.tech.rukesh.techlearn.exception.NoSuchTechnoloyExistsException;
 import com.tech.rukesh.techlearn.exception.TechnoloyAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.TechnoloyException;
@@ -50,13 +51,24 @@ import com.tech.rukesh.techlearn.util.StatusMap;
 import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRXlsExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.ExporterInput;
+import net.sf.jasperreports.export.SimpleCsvExporterConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 
 
 
@@ -96,18 +108,18 @@ public class TechnoloyService {
 	 * @param technoloyDto
 	 * @return
 	 */
-	public String saveTechnology(TechnoloyDto technoloyDto)
+	public String saveTechnology(TechnoloyRequest technoloyrequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		
-		Optional<Technoloy> techopt = technologyRepository.findByName(technoloyDto.getName());
+		Optional<Technoloy> techopt = technologyRepository.findByName(technoloyrequest.getName());
 
 		Technoloy techsave=null;
 				
 		if(techopt.isPresent())
 		throw new TechnoloyAlreadyExistsException("TechnoloyAlreadyExists");
 		else
-		techsave = mapFromTechnoloyDto(technoloyDto);	
+		techsave = mapFromTechnoloyRequest(technoloyrequest);	
 		try {
 		technologyRepository.save(techsave);
 		}catch (Exception e) {
@@ -134,7 +146,7 @@ public class TechnoloyService {
 	 * @author Rukesh
 	 * @return
 	 */
-	public List<TechnoloyDto> getAllTechnologies()
+	public List<TechnoloyRequest> getAllTechnologies()
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		List<Technoloy> techlist = (List<Technoloy>) technologyRepository.findAll();
@@ -148,7 +160,7 @@ public class TechnoloyService {
 	 * @param id
 	 * @return
 	 */
-	public TechnoloyDto getTechnologyById(Integer id)
+	public TechnoloyRequest getTechnologyById(Integer id)
 	{		
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		Optional<Technoloy> techOpt =  technologyRepository.findById(id);
@@ -220,7 +232,7 @@ public class TechnoloyService {
 	private Technoloy mapFromTechnologyCommentsDto(TechnologyCommentsDto technologyCommentsUpdateDto) {
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());			
 		
-		TechnoloyDto TechnoloyDtoDB = getTechnologyById(technologyCommentsUpdateDto.getId());
+		TechnoloyRequest TechnoloyDtoDB = getTechnologyById(technologyCommentsUpdateDto.getId());
 		Optional<StatusMain> statusMain  = statusMainRepository.findById(technologyCommentsUpdateDto.getStatusId());	
 		
 		Optional<UserRegistration> userOptional =  userRegistrationRepository.findById(TechnoloyDtoDB.getUserId());
@@ -250,9 +262,9 @@ public class TechnoloyService {
     * @param techsave
     * @return
     */
-	public TechnoloyDto mapToDto(Technoloy techsave) {
+	public TechnoloyRequest mapToDto(Technoloy techsave) {
 	
-		return TechnoloyDto.builder()
+		return TechnoloyRequest.builder()
 				.id(techsave.getId())
 				.name(techsave.getName())
 				.code(techsave.getCode())
@@ -272,24 +284,24 @@ public class TechnoloyService {
 	 * @param technoloyDto
 	 * @return
 	 */
-	public Technoloy mapFromTechnoloyDto(TechnoloyDto technoloyDto) {
+	public Technoloy mapFromTechnoloyRequest(TechnoloyRequest technoloyRequest) {
 		
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
 	
 		Date createdDate =new Date(System.currentTimeMillis());
 		Date modifieddate = new Date(System.currentTimeMillis());
-		Date ExpectedCompletionDate  =  technoloyDto.getExpectedCompletionDate();
+		Date ExpectedCompletionDate  =  technoloyRequest.getExpectedCompletionDate();
 		String totaltimeString = calculateTotalTime(createdDate,ExpectedCompletionDate);
 		
-		Optional<UserRegistration> userOptional =  userRegistrationRepository.findById(technoloyDto.getUserId());
+		Optional<UserRegistration> userOptional =  userRegistrationRepository.findById(technoloyRequest.getUserId());
 		
-		Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(technoloyDto.getStatusId());	
+		Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(technoloyRequest.getStatusId());	
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
 
 		return Technoloy.builder()
-				.name(technoloyDto.getName())
-				.description(technoloyDto.getDescription())
+				.name(technoloyRequest.getName())
+				.description(technoloyRequest.getDescription())
 				.code(randomCodeGenerator.generateRandomCode())
 				.createdDate(createdDate)
 				.modifiedDate(modifieddate)
@@ -381,7 +393,7 @@ public class TechnoloyService {
 			finalPath+=folderName.trim()+fileName.trim()+".".trim()+format.trim();
 			
 			
-			List<TechnoloyDto> listoftechnologies  =  getAllTechnologies();
+			List<TechnoloyRequest> listoftechnologies  =  getAllTechnologies();
 			File file =  ResourceUtils.getFile("classpath:technologies.jrxml");
 			JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
 			JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(listoftechnologies);
@@ -400,13 +412,36 @@ public class TechnoloyService {
         		{
         			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
         			response.setContentType("application/x-csv");
+        			JRCsvExporter exporter = new JRCsvExporter();
+     			    exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+     			    exporter.setExporterOutput(new SimpleWriterExporterOutput(finalPath.toString()));
+     			    SimpleCsvExporterConfiguration configuration = new SimpleCsvExporterConfiguration();
+     			    //configuration.setWriteBOM(Boolean.TRUE);
+     			    exporter.setConfiguration(configuration);
+     			    exporter.exportReport();
         		}
         		else if(format.equalsIgnoreCase("doc") || format.equalsIgnoreCase("docx"))
         		{
+        			    
         			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
         			response.setContentType("application/msword");
+        			JRDocxExporter exporter = new JRDocxExporter();
+        		    exporter.setExporterInput(new SimpleExporterInput(jasperPrint));      
+        		   // File exportReportFile = new File(fileName + ".docx");
+        		    exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(finalPath.toString()));
+        		    exporter.exportReport();
+        			
+        			
         		}else if(format.equalsIgnoreCase("xls") || format.equalsIgnoreCase("xlsx"))
         		{
+        			
+        			JRXlsxExporter exporter = new JRXlsxExporter();
+		            SimpleXlsxReportConfiguration reportConfigXLS = new SimpleXlsxReportConfiguration();
+		            reportConfigXLS.setSheetNames(new String[] { "sheet1" });
+		            exporter.setConfiguration(reportConfigXLS);
+		            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(finalPath.toString()));
+		            exporter.exportReport();
         			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
         			response.setContentType("application/ms-excel");
         			
@@ -422,6 +457,9 @@ public class TechnoloyService {
         			response.setHeader("CONTENT_DISPOSITION", "attachment;filename=technologiesreport."+format);
         			response.setContentType("application/TEXT_HTML");
         			JasperExportManager.exportReportToHtmlFile(jasperPrint, finalPath);
+        		}else {
+        			
+        			throw new InvalidFormatException("InvalidFormatException");
         		}
                
                 FileInputStream fileInputStream =new FileInputStream(new File(finalPath));
