@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -327,53 +328,57 @@ public class TechnoloyService {
 	
 	
 
-
-	/**
-	 * @param technoloyDto
-	 */
 	private String calculateTotalTime(Date startDate , Date endDate) {
+		
 		 logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+		 
 		 LocalDate startdate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 		 LocalDate ExpectedCompletionDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		 double totalDays = (double) ChronoUnit.DAYS.between(startdate,ExpectedCompletionDate);
-		 String totalDaysStr="";
-		 if(totalDays>365) {
-			 totalDays = totalDays/366;
-			 DecimalFormat f = new DecimalFormat("#.#");
-			 f.format(totalDays);
-			 if(totalDays==366)
-			 totalDaysStr+=totalDays+" Year";
-			 else
-			 totalDaysStr+=totalDays+" Years";
-			 
-		 }
-		 else if(totalDays>=31 && totalDays<=366)
+		 Period period =  Period.between(startdate, ExpectedCompletionDate);
+		 int years = period.getYears();
+		 int months = period.getMonths();
+		 int days = period.getDays();
+		 String yearsappend="";
+		 String Monthsappend="";
+		 String Daysappend="";
+		 String finalappender="";
+		 if(years!=0)
 		 {
-			 totalDays = totalDays/31;
-			 DecimalFormat f = new DecimalFormat("##.0");
-			 f.format(totalDays);
-			 if(totalDays==1)
-			 totalDaysStr+=totalDays+" Month";
+			 if(years==1)
+			 yearsappend+=years+" Year";
 			 else
-			 totalDaysStr+=totalDays+" Months";
-			
-		 }else {
-			 
-			 if(totalDays==1)
-			 totalDaysStr+=totalDays+" Day";
-			 else
-			 totalDaysStr+=totalDays+" Days";
-				 
+			 yearsappend+=years+" Years";	 
 		 }
+		 
+		 if(months!=0)
+		 {
+			   if(months==1)
+			   Monthsappend+=months+" Month";
+			   else
+			   Monthsappend+=months+" Months";	
+		 }
+		 
+		 if(days!=0)
+		 {
+			 if(days==1)
+			 Daysappend+=days+" Day";
+			 else
+			 Daysappend+=days+" Days";
+				 
+			 
+		 }
+		 
+		 finalappender=yearsappend+" "+Monthsappend+" "+Daysappend;
+		 
+		 
 		
-	   logger.info("totalDaysStr...."+totalDaysStr);
+		
+	   logger.info("totalDaysStr...."+finalappender);
 
 	   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		return totalDaysStr;
+		return finalappender;
 	}
-
-
 	
 	
 

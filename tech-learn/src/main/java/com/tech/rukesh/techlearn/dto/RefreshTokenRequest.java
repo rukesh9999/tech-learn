@@ -27,6 +27,8 @@ public class RefreshTokenRequest {
 
 	@NotBlank(message ="refreshToken is required")
 	private String refreshToken;
+	
+	@NotBlank(message ="refreshToken is required")
 	private String userName;
 	
 }

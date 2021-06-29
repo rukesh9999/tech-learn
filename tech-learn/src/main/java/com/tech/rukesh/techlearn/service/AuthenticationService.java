@@ -66,9 +66,10 @@ public class AuthenticationService {
 	@Autowired
 	private RefreshTokenService refreshTokenService;
 	
-	/*
-	 * @Autowired private PasswordEncoder passwordEncoder;
-	 */
+	
+	  @Autowired 
+	  private PasswordEncoder passwordEncoder;
+	 
 	
 	
 	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
@@ -78,12 +79,12 @@ public class AuthenticationService {
 	public String registerUser(RegistrationRequest registrationRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-
+		String generatedPassword = passwordGenerator.generatePassword();
 		Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(registrationRequest.getEmail());
 		if(optUser.isPresent())
 		throw new UserAlreadyExistsException("UserAlreadyExists");
 		UserRegistration userRegistration = mapFromUserRegistrationRequest(registrationRequest);
-		userRegistration.setPassword(passwordGenerator.generatePassword());
+		userRegistration.setPassword(passwordEncoder.encode(generatedPassword));
 		try {
 		    userRegistrationRepository.save(userRegistration);
 		}catch (Exception e) {
@@ -97,7 +98,7 @@ public class AuthenticationService {
 		mailAcknowledgementDto.setTypeOfMail("AccountCreation");
 		mailAcknowledgementDto.setSubject("New Account Created");
 		mailAcknowledgementDto.setFromAddress(fromAddress);
-		mailManagerService.sendAccountCreatedAcknowledgeMail(mailAcknowledgementDto);
+		mailManagerService.sendAccountCreatedAcknowledgeMail(mailAcknowledgementDto,generatedPassword);
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
@@ -121,6 +122,7 @@ public class AuthenticationService {
 			   .athenticationToken(athenticationToken)
 			   .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
 			   .userName(loginRequest.getUserName())
+			   .refreshToken(refreshTokenService.generateRefreshToken().getToken())
 			   .build();
 			   
 			  

@@ -54,7 +54,7 @@ public class MailBuilder {
 	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
 
 	
-	public String buildRegistration(Integer userid)
+	public String buildRegistration(Integer userid,String generatedPassword)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		Optional<UserRegistration> userRegistration =  userRegistrationRepository.findById(userid);
@@ -64,7 +64,7 @@ public class MailBuilder {
 		context.setVariable("firstName", userregistration.getFirstName());
 		context.setVariable("lastName", userregistration.getLastName());
 		context.setVariable("email", userregistration.getEmail());
-		context.setVariable("password", userregistration.getPassword());
+		context.setVariable("password", generatedPassword);
 		logger.info("url ..."+url);
 
 		context.setVariable("url", url);

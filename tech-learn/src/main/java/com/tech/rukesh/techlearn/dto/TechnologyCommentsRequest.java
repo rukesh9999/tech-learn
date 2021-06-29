@@ -7,6 +7,7 @@ import java.util.Date;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Future;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -42,6 +43,7 @@ public class TechnologyCommentsRequest {
 	
 	@JsonFormat(pattern ="dd-MM-yyyy HH:mm:ss")
    	@Temporal(TemporalType.TIMESTAMP)
+	@Future(message ="expectedCompletionDate must be future Date")
 	@NotNull(message ="expectedCompletionDate is required")
 	private Date expectedCompletionDate;
 	

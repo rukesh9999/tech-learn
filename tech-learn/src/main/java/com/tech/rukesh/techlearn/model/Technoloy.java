@@ -60,8 +60,7 @@ public class Technoloy {
     @Column(name="description",unique = false,nullable =false,length =65536)   
     private String description;
     
-    @JsonFormat(pattern ="dd-MM-yyyy HH:mm:ss")
-   	@Temporal(TemporalType.TIMESTAMP)
+	
     @Column(name ="expected_completion_date",unique = false,nullable =false,length =100)
     private Date expectedCompletionDate;
     

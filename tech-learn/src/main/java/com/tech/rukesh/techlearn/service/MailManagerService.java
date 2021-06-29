@@ -50,12 +50,12 @@ public class MailManagerService {
 	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
 
 	
-	public Boolean sendAccountCreatedAcknowledgeMail(MailAcknowledgementDto mailAcknowledgementDto)
+	public Boolean sendAccountCreatedAcknowledgeMail(MailAcknowledgementDto mailAcknowledgementDto,String generatedPassword)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		Boolean status=false;	
-		String  html = mailBuilder.buildRegistration(mailAcknowledgementDto.getUserId());
+		String  html = mailBuilder.buildRegistration(mailAcknowledgementDto.getUserId(),generatedPassword);
 		mailAcknowledgementDto.setBody(html);
 		this.saveMailDetailsBeforeSend(mailAcknowledgementDto);
 		this.sendMail(mailAcknowledgementDto);	
