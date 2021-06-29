@@ -2,10 +2,7 @@ package com.tech.rukesh.techlearn.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -21,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +25,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
-import com.lowagie.text.pdf.codec.Base64.InputStream;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
-import com.tech.rukesh.techlearn.dto.TechnologyCommentsDto;
+import com.tech.rukesh.techlearn.dto.TechnologyCommentsRequest;
 import com.tech.rukesh.techlearn.dto.TechnoloyRequest;
+import com.tech.rukesh.techlearn.dto.TechnoloyResponse;
 import com.tech.rukesh.techlearn.exception.InvalidFormatException;
+import com.tech.rukesh.techlearn.exception.NoSuchStatusMainException;
 import com.tech.rukesh.techlearn.exception.NoSuchTechnoloyExistsException;
+import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.exception.TechnoloyAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.TechnoloyException;
 import com.tech.rukesh.techlearn.model.Comments;
@@ -50,8 +48,6 @@ import com.tech.rukesh.techlearn.util.StatusMap;
 
 import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -59,11 +55,8 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleCsvExporterConfiguration;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
@@ -96,7 +89,8 @@ public class TechnoloyService {
 	@Autowired
 	private MailManagerService mailManagerService;
 	
-	
+	@Autowired
+	private AuthenticationService authenticationService;
 	
 	@Value("${mail.fromAddress}")
 	private String fromAddress;
@@ -146,12 +140,12 @@ public class TechnoloyService {
 	 * @author Rukesh
 	 * @return
 	 */
-	public List<TechnoloyRequest> getAllTechnologies()
+	public List<TechnoloyResponse> getAllTechnologies()
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		List<Technoloy> techlist = (List<Technoloy>) technologyRepository.findAll();
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return techlist.stream().map(this::mapToDto).collect(Collectors.toList());
+		return techlist.stream().map(this::mapToTechnologyResponse).collect(Collectors.toList());
 
 	}
 	
@@ -160,7 +154,7 @@ public class TechnoloyService {
 	 * @param id
 	 * @return
 	 */
-	public TechnoloyRequest getTechnologyById(Integer id)
+	public TechnoloyResponse getTechnologyById(Integer id)
 	{		
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		Optional<Technoloy> techOpt =  technologyRepository.findById(id);
@@ -168,7 +162,7 @@ public class TechnoloyService {
 		throw new NoSuchTechnoloyExistsException(" NoSuchTechnoloyExists");
 		else
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return mapToDto(techOpt.get());
+		return mapToTechnologyResponse(techOpt.get());
 		
 	}
 	
@@ -178,10 +172,10 @@ public class TechnoloyService {
 	 * @param technoloyDto
 	 * @return
 	 */
-	public String updateTechnology(TechnologyCommentsDto TechnologyCommentsUpdateDto)
+	public String updateTechnology(TechnologyCommentsRequest technologyCommentsRequest)
 	{		
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
-		Technoloy  techUpdate = mapFromTechnologyCommentsDto(TechnologyCommentsUpdateDto);
+		Technoloy  techUpdate = mapFromTechnologyCommentsRequest(technologyCommentsRequest);
 		String Status="";
 		try {
 			techUpdate = technologyRepository.save(techUpdate);	
@@ -191,7 +185,7 @@ public class TechnoloyService {
 		
 		
 		Comments comments = new Comments();
-		comments.setComment(TechnologyCommentsUpdateDto.getComment());
+		comments.setComment(technologyCommentsRequest.getComment());
 		comments.setCreatedDate(new Date(System.currentTimeMillis()));
 		comments.setTechnoloy(techUpdate);
 		comments.setUserRegistration(techUpdate.getUserRegistration());
@@ -229,29 +223,37 @@ public class TechnoloyService {
 	 * @param technologyCommentsUpdateDto
 	 * @return
 	 */
-	private Technoloy mapFromTechnologyCommentsDto(TechnologyCommentsDto technologyCommentsUpdateDto) {
+	private Technoloy mapFromTechnologyCommentsRequest(TechnologyCommentsRequest technologyCommentsRequest) {
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());			
+		StatusMain statusMain=null;
 		
-		TechnoloyRequest TechnoloyDtoDB = getTechnologyById(technologyCommentsUpdateDto.getId());
-		Optional<StatusMain> statusMain  = statusMainRepository.findById(technologyCommentsUpdateDto.getStatusId());	
+		TechnoloyResponse TechnoloyResponse = getTechnologyById(technologyCommentsRequest.getId());
 		
-		Optional<UserRegistration> userOptional =  userRegistrationRepository.findById(TechnoloyDtoDB.getUserId());
+		if(technologyCommentsRequest.getStatusId()!=null) {
+		 Optional<StatusMain> statusMainopt  = statusMainRepository.findById(technologyCommentsRequest.getStatusId());
+		 statusMain = statusMainopt.get();
+		}else {
+		    statusMain =	statusMainRepository.findByName(TechnoloyResponse.getStatusName()).orElseThrow(()->new NoSuchStatusMainException("status doesnot exists"));
+			
+		}
 		
-		String totaltimeString = calculateTotalTime(TechnoloyDtoDB.getCreatedDate(),technologyCommentsUpdateDto.getExpectedCompletionDate());	
+		UserRegistration userRegistration = authenticationService.getCurrentUser();
+		
+		String totaltimeString = calculateTotalTime(TechnoloyResponse.getCreatedDate(),technologyCommentsRequest.getExpectedCompletionDate());	
        	
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
 
 		return Technoloy.builder()
-				.id(TechnoloyDtoDB.getId())
-				.code(TechnoloyDtoDB.getCode())
-				.name(technologyCommentsUpdateDto.getName())
-				.description(technologyCommentsUpdateDto.getDescription())
-				.createdDate(TechnoloyDtoDB.getCreatedDate())
-				.expectedCompletionDate(technologyCommentsUpdateDto.getExpectedCompletionDate())
+				.id(technologyCommentsRequest.getId())
+				.code(TechnoloyResponse.getCode())
+				.name(technologyCommentsRequest.getName())
+				.description(technologyCommentsRequest.getDescription())
+				.createdDate(TechnoloyResponse.getCreatedDate())
+				.expectedCompletionDate(technologyCommentsRequest.getExpectedCompletionDate())
 				.totalTimeToComplete(totaltimeString)
 				.modifiedDate(new Date(System.currentTimeMillis()))
-				.statusMain(statusMain.get())
-				.userRegistration(userOptional.get())
+				.statusMain(statusMain)
+				.userRegistration(userRegistration)
 		        .build();	
 	   
 	}
@@ -262,10 +264,17 @@ public class TechnoloyService {
     * @param techsave
     * @return
     */
-	public TechnoloyRequest mapToDto(Technoloy techsave) {
+	public TechnoloyResponse mapToTechnologyResponse(Technoloy techsave) {
 	
-		return TechnoloyRequest.builder()
-				.id(techsave.getId())
+	  	StatusMain statusmain = statusMainRepository.findById(techsave.getStatusMain().getId()).orElseThrow(()->new NoSuchStatusMainException("No such status exists"));
+	  	
+	  	UserRegistration userRegistration =  userRegistrationRepository.findById(techsave.getUserRegistration().getUserId()).orElseThrow(()->new NoSuchUserExistsException("user doesnot exits"));
+	  		  	 
+	  	String firstName = userRegistration.getFirstName();
+	  	String lastName = userRegistration.getLastName();
+		String fullName = firstName+lastName;
+		
+		return TechnoloyResponse.builder()
 				.name(techsave.getName())
 				.code(techsave.getCode())
 				.createdDate(techsave.getCreatedDate())
@@ -273,8 +282,8 @@ public class TechnoloyService {
 				.description(techsave.getDescription())
 				.expectedCompletionDate(techsave.getExpectedCompletionDate())
 				.totalTimeToComplete(techsave.getTotalTimeToComplete())
-				.statusId(techsave.getStatusMain().getId())
-				.userId(techsave.getUserRegistration().getUserId())
+				.statusName(statusmain.getName())
+				.CreatedBy(fullName)
 				.build();
 	}
 
@@ -293,9 +302,10 @@ public class TechnoloyService {
 		Date ExpectedCompletionDate  =  technoloyRequest.getExpectedCompletionDate();
 		String totaltimeString = calculateTotalTime(createdDate,ExpectedCompletionDate);
 		
-		Optional<UserRegistration> userOptional =  userRegistrationRepository.findById(technoloyRequest.getUserId());
+		UserRegistration userRegistration =   authenticationService.getCurrentUser();
+		//Optional<UserRegistration> userOptional =  auth.findById(technoloyRequest.getUserId());
 		
-		Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(technoloyRequest.getStatusId());	
+		Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(StatusMap.New);	
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
 
@@ -307,7 +317,7 @@ public class TechnoloyService {
 				.modifiedDate(modifieddate)
 				.expectedCompletionDate(ExpectedCompletionDate)
 				.totalTimeToComplete(totaltimeString)
-				.userRegistration(userOptional.get())
+				.userRegistration(userRegistration)
 				.statusMain(statusMainOpt.get())
 				.build();
 				
@@ -393,7 +403,7 @@ public class TechnoloyService {
 			finalPath+=folderName.trim()+fileName.trim()+".".trim()+format.trim();
 			
 			
-			List<TechnoloyRequest> listoftechnologies  =  getAllTechnologies();
+			List<TechnoloyResponse> listoftechnologies  =  getAllTechnologies();
 			File file =  ResourceUtils.getFile("classpath:technologies.jrxml");
 			JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
 			JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(listoftechnologies);

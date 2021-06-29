@@ -8,10 +8,10 @@ package com.tech.rukesh.techlearn.util;
  *
  */
 
-public class StatusMap {
+public interface StatusMap {
 
 	public static final Integer New=1;
-	public static final Integer InProgress=3;
-	public static final Integer Closed=2;
+	public static final Integer InProgress=2;
+	public static final Integer Closed=3;
 	
 }

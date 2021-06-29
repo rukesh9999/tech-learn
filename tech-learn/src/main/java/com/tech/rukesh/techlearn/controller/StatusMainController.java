@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tech.rukesh.techlearn.dto.StatusMainDto;
+import com.tech.rukesh.techlearn.dto.StatusMainRequest;
+import com.tech.rukesh.techlearn.dto.StatusMainResponse;
+import com.tech.rukesh.techlearn.dto.StatusMainUpdateRequest;
 import com.tech.rukesh.techlearn.service.StatusMainService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,37 +36,37 @@ public class StatusMainController {
 
 	
 	@PostMapping("/save")
-	public ResponseEntity<StatusMainDto> saveStatusMain(@Valid @RequestBody StatusMainDto statusMainDto){
+	public ResponseEntity<String> saveStatusMain(@Valid @RequestBody StatusMainRequest statusMainDto){
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		StatusMainDto statusDto = statusMainService.saveStatusMain(statusMainDto);
+		String status = statusMainService.saveStatusMain(statusMainDto);
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<StatusMainDto>(statusDto,HttpStatus.OK);
+		return new ResponseEntity<String>(status,HttpStatus.OK);
 	}
 
 	@GetMapping("/all")
-	public ResponseEntity<List<StatusMainDto>> getAllStatusMains()
+	public ResponseEntity<List<StatusMainResponse>> getAllStatusMains()
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-	    List<StatusMainDto> listofstatusmains = statusMainService.getAllStatusMain();		
+	    List<StatusMainResponse> listofstatusmains = statusMainService.getAllStatusMain();		
 	    logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<List<StatusMainDto>>(listofstatusmains,HttpStatus.OK);
+		return new ResponseEntity<List<StatusMainResponse>>(listofstatusmains,HttpStatus.OK);
 	}
 	
 	@GetMapping("/get/{id}")
-	public ResponseEntity<StatusMainDto> getStatusMainById(@PathVariable("id") Integer id)
+	public ResponseEntity<StatusMainResponse> getStatusMainById(@PathVariable("id") Integer id)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		StatusMainDto statusMainDto =  statusMainService.getStatusMainById(id);
+		StatusMainResponse statusMainResponse =  statusMainService.getStatusMainById(id);
 	    logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<StatusMainDto>(statusMainDto,HttpStatus.OK);
+		return new ResponseEntity<StatusMainResponse>(statusMainResponse,HttpStatus.OK);
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<StatusMainDto> updateStatusMainDto(@Valid @RequestBody StatusMainDto statusMainDto)
+	public ResponseEntity<String> updateStatusMainDto(@Valid @RequestBody StatusMainUpdateRequest statusMainUpdateRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		StatusMainDto statusDto =  statusMainService.updateStatusMain(statusMainDto);
+		String status =  statusMainService.updateStatusMain(statusMainUpdateRequest);
 	    logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<StatusMainDto>(statusDto,HttpStatus.OK);
+		return new ResponseEntity<String>(status,HttpStatus.OK);
 	}
 }

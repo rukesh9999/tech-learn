@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.tech.rukesh.techlearn.dto.StatusMainDto;
+import com.tech.rukesh.techlearn.dto.StatusMainRequest;
+import com.tech.rukesh.techlearn.dto.StatusMainResponse;
+import com.tech.rukesh.techlearn.dto.StatusMainUpdateRequest;
 import com.tech.rukesh.techlearn.exception.NoSuchStatusMainException;
 import com.tech.rukesh.techlearn.exception.StatusMainAlreadyExists;
 import com.tech.rukesh.techlearn.exception.StatusMainException;
@@ -35,36 +37,36 @@ public class StatusMainService {
 	 * @param statusMainDto
 	 * @return
 	 */
-	public StatusMainDto saveStatusMain(StatusMainDto statusMainDto)
+	public String saveStatusMain(StatusMainRequest statusMainRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		StatusMain statusMainsave=null;
-		Optional<StatusMain> optstatusmain = statusMainRepository.findByName(statusMainDto.getName());
+		Optional<StatusMain> optstatusmain = statusMainRepository.findByName(statusMainRequest.getName());
 		if(optstatusmain.isPresent())
 		throw new StatusMainException("StatusMainAlreadyExists");
 		else	
-		statusMainsave = mapFromDto(statusMainDto);
+		statusMainsave = mapFromStatusMainRequest(statusMainRequest);
 		try {
 		statusMainRepository.save(statusMainsave);
 		}catch (Exception e) {
 			throw new StatusMainException(e.getMessage());
 		}
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return mapToDto(statusMainsave);
+		return "StatusMain saved successfully";
 	}
 	
 	/**
 	 * @author Rukesh
 	 * @return
 	 */
-	public List<StatusMainDto> getAllStatusMain()
+	public List<StatusMainResponse> getAllStatusMain()
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		List<StatusMain> statusmainlist = (List<StatusMain>) statusMainRepository.findAll();
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		return statusmainlist.stream()
-				.map(this::mapToDto)
+				.map(this::mapToStatusMainResponse)
 				.collect(Collectors.toList());
 	}
 	
@@ -74,7 +76,7 @@ public class StatusMainService {
 	 * @param id
 	 * @return
 	 */
-    public StatusMainDto getStatusMainById(Integer id)
+    public StatusMainResponse getStatusMainById(Integer id)
     {
 	   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
        Optional<StatusMain> statusmain = statusMainRepository.findById(id);
@@ -82,7 +84,7 @@ public class StatusMainService {
        throw new NoSuchStatusMainException("NoSuchStatusMain Exists");
        else
    	   logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-       return mapToDto(statusmain.get());
+       return mapToStatusMainResponse(statusmain.get());
 	    
     }
 
@@ -91,17 +93,17 @@ public class StatusMainService {
      * @param statusMain
      * @return
      */
-    public StatusMainDto updateStatusMain(StatusMainDto statusMainUpdateDto)
+    public String updateStatusMain(StatusMainUpdateRequest statusMainUpdateRequest)
     {
  	    logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-    	StatusMainDto statusmaindbdto  = getStatusMainById(statusMainUpdateDto.getId());
-    	Optional<StatusMain> optstatusmain = statusMainRepository.findByName(statusMainUpdateDto.getName());
+    	StatusMainResponse statusmaindbdto  = getStatusMainById(statusMainUpdateRequest.getId());
+    	Optional<StatusMain> optstatusmain = statusMainRepository.findByName(statusMainUpdateRequest.getName());
     	if(optstatusmain.isPresent())
     	throw new StatusMainAlreadyExists("StatusMainAlreadyExists");
     	StatusMain statusMain=new StatusMain();
-    	statusMain.setId(statusmaindbdto.getId());
-    	statusMain.setName(statusMainUpdateDto.getName());
-    	statusMain.setDescription(statusMainUpdateDto.getDescription());
+    	statusMain.setId(statusMainUpdateRequest.getId());
+    	statusMain.setName(statusMainUpdateRequest.getName());
+    	statusMain.setDescription(statusMainUpdateRequest.getDescription());
     	statusMain.setCreatedDate(statusmaindbdto.getCreatedDate());
     	statusMain.setModifiedDate(new Date(System.currentTimeMillis()));
     	try {
@@ -110,15 +112,15 @@ public class StatusMainService {
 			throw new StatusMainException(e.getMessage());
 		}
  	    logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-    	return mapToDto(statusMain);
+    	return "status updated successfully";
     }
     
     
-	public StatusMain mapFromDto(StatusMainDto statusMainDto) {				
+	public StatusMain mapFromStatusMainRequest(StatusMainRequest statusMainRequest) {				
 		
 		return StatusMain.builder()
-				.name(statusMainDto.getName())
-				.description(statusMainDto.getDescription())
+				.name(statusMainRequest.getName())
+				.description(statusMainRequest.getDescription())
 				.createdDate(new Date(System.currentTimeMillis()))
 				.modifiedDate(new Date(System.currentTimeMillis()))
 				.build();
@@ -126,10 +128,9 @@ public class StatusMainService {
 
 
 
-	public StatusMainDto  mapToDto(StatusMain statusMain) {
+	public StatusMainResponse  mapToStatusMainResponse(StatusMain statusMain) {
 		
-		return StatusMainDto.builder()
-			   .id(statusMain.getId())
+		return StatusMainResponse.builder()
 			   .name(statusMain.getName())
 			   .description(statusMain.getDescription())
 			   .createdDate(statusMain.getCreatedDate())

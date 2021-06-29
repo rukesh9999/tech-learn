@@ -21,8 +21,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.tech.rukesh.techlearn.dto.TechnologyCommentsDto;
+import com.tech.rukesh.techlearn.dto.TechnologyCommentsRequest;
 import com.tech.rukesh.techlearn.dto.TechnoloyRequest;
+import com.tech.rukesh.techlearn.dto.TechnoloyResponse;
 import com.tech.rukesh.techlearn.service.TechnoloyService;
 
 import lombok.RequiredArgsConstructor;
@@ -50,31 +51,31 @@ public class TechnoloyController {
 	
 	
 	@GetMapping("/all")
-	public ResponseEntity<List<TechnoloyRequest>> getAllTechnologies()
+	public ResponseEntity<List<TechnoloyResponse>> getAllTechnologies()
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		List<TechnoloyRequest>  techlist = technoloyService.getAllTechnologies();
+		List<TechnoloyResponse>  techlist = technoloyService.getAllTechnologies();
 		logger.info("End of..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<List<TechnoloyRequest>>(techlist,HttpStatus.OK);
+		return new ResponseEntity<List<TechnoloyResponse>>(techlist,HttpStatus.OK);
 
 	}
 	
 	
 	@GetMapping("/get/{id}")
-	public ResponseEntity<TechnoloyRequest> getTechnologyById(@PathVariable("id")Integer id)
+	public ResponseEntity<TechnoloyResponse> getTechnologyById(@PathVariable("id")Integer id)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
-		TechnoloyRequest technologyDto = technoloyService.getTechnologyById(id);
+		TechnoloyResponse technoloyResponse = technoloyService.getTechnologyById(id);
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<TechnoloyRequest>(technologyDto,HttpStatus.OK);
+		return new ResponseEntity<TechnoloyResponse>(technoloyResponse,HttpStatus.OK);
 
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<String> updateTechnlogy(@Valid @RequestBody TechnologyCommentsDto technologyCommentsDto)
+	public ResponseEntity<String> updateTechnlogy(@Valid @RequestBody TechnologyCommentsRequest technologyCommentsRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
-		String status = technoloyService.updateTechnology(technologyCommentsDto);		
+		String status = technoloyService.updateTechnology(technologyCommentsRequest);		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		return new ResponseEntity<String>(status,HttpStatus.OK);
 

@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ import com.tech.rukesh.techlearn.dto.AuthenticationResponse;
 import com.tech.rukesh.techlearn.dto.LoginRequest;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.dto.RefreshTokenRequest;
-import com.tech.rukesh.techlearn.dto.UserRegistrationRequest;
+import com.tech.rukesh.techlearn.dto.RegistrationRequest;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.UserRegistrationException;
@@ -44,6 +45,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
+	@Value("${mail.fromAddress}")
+	private String fromAddress;
+	
 	@Autowired
 	private UserRegistrationRepository userRegistrationRepository;
 	
@@ -62,19 +66,23 @@ public class AuthenticationService {
 	@Autowired
 	private RefreshTokenService refreshTokenService;
 	
+	/*
+	 * @Autowired private PasswordEncoder passwordEncoder;
+	 */
+	
+	
 	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
 	
-	@Value("${mail.fromAddress}")
-	private String fromAddress;
 	
-	public String registerUser(UserRegistrationRequest userRegistrationRequest)
+	
+	public String registerUser(RegistrationRequest registrationRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(userRegistrationRequest.getEmail());
+		Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(registrationRequest.getEmail());
 		if(optUser.isPresent())
 		throw new UserAlreadyExistsException("UserAlreadyExists");
-		UserRegistration userRegistration = mapFromUserRegistrationRequest(userRegistrationRequest);
+		UserRegistration userRegistration = mapFromUserRegistrationRequest(registrationRequest);
 		userRegistration.setPassword(passwordGenerator.generatePassword());
 		try {
 		    userRegistrationRepository.save(userRegistration);
@@ -148,12 +156,12 @@ public class AuthenticationService {
 	  }
 	
 	
-	public UserRegistration mapFromUserRegistrationRequest(UserRegistrationRequest userRegistrationRequest)
+	public UserRegistration mapFromUserRegistrationRequest(RegistrationRequest registrationRequest)
 	{
 		return UserRegistration.builder()
-				.firstName(userRegistrationRequest.getFirstName())
-				.lastName(userRegistrationRequest.getLastName())
-				.email(userRegistrationRequest.getEmail())
+				.firstName(registrationRequest.getFirstName())
+				.lastName(registrationRequest.getLastName())
+				.email(registrationRequest.getEmail())
 				.build();
 	}
 	

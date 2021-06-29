@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package com.tech.rukesh.techlearn.dto;
 
 import java.util.Date;
@@ -11,20 +14,25 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * @author Rukesh
+ *
+ */
 @Builder
 @Setter
 @Getter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-public class TechnoloyRequest {
+public class TechnologyCommentsRequest {
+	
+	@NotNull(message ="id is Required")
+	private Integer id;
 	
 	@NotBlank(message ="Name is Required")
 	private String name;
@@ -37,5 +45,9 @@ public class TechnoloyRequest {
 	@NotNull(message ="expectedCompletionDate is required")
 	private Date expectedCompletionDate;
 	
+	@NotBlank(message ="comment is required")
+	private String comment;
 	
+	private Integer statusId;
+
 }
