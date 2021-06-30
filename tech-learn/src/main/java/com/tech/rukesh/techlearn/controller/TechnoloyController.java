@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.tech.rukesh.techlearn.dto.TechnologyCommentsRequest;
+import com.tech.rukesh.techlearn.dto.TechnologyStatusResponse;
 import com.tech.rukesh.techlearn.dto.TechnoloyRequest;
 import com.tech.rukesh.techlearn.dto.TechnoloyResponse;
 import com.tech.rukesh.techlearn.service.TechnoloyService;
@@ -91,5 +92,15 @@ public class TechnoloyController {
 		
 		
 	}
+	
+	@GetMapping("/dashboard/count")
+	public ResponseEntity<TechnologyStatusResponse> getDashBoardCount()
+	{
+	   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
+	   TechnologyStatusResponse technoloyResponse =  technoloyService.getDashBoardCount();
+	   logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+       return  new ResponseEntity<TechnologyStatusResponse>(technoloyResponse,HttpStatus.OK);
+	}
+	
 	
 }

@@ -3,11 +3,9 @@ package com.tech.rukesh.techlearn.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +26,7 @@ import org.springframework.util.ResourceUtils;
 
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.dto.TechnologyCommentsRequest;
+import com.tech.rukesh.techlearn.dto.TechnologyStatusResponse;
 import com.tech.rukesh.techlearn.dto.TechnoloyRequest;
 import com.tech.rukesh.techlearn.dto.TechnoloyResponse;
 import com.tech.rukesh.techlearn.exception.InvalidFormatException;
@@ -234,7 +233,7 @@ public class TechnoloyService {
 		 Optional<StatusMain> statusMainopt  = statusMainRepository.findById(technologyCommentsRequest.getStatusId());
 		 statusMain = statusMainopt.get();
 		}else {
-		    statusMain =	statusMainRepository.findByName(TechnoloyResponse.getStatusName()).orElseThrow(()->new NoSuchStatusMainException("status doesnot exists"));
+		    statusMain = statusMainRepository.findByName(TechnoloyResponse.getStatusName()).orElseThrow(()->new NoSuchStatusMainException("status doesnot exists"));
 			
 		}
 		
@@ -498,6 +497,21 @@ public class TechnoloyService {
 		
 		
 		
+	}
+
+
+	public TechnologyStatusResponse getDashBoardCount() {
+		
+		Integer newStatusCount = technologyRepository.countBystatusMainId(StatusMap.New);
+		Integer inProgressStatusCount = technologyRepository.countBystatusMainId(StatusMap.InProgress);
+		Integer closedStatusCount = technologyRepository.countBystatusMainId(StatusMap.Closed);
+		
+		TechnologyStatusResponse technologyStatusResponse =new TechnologyStatusResponse();
+		technologyStatusResponse.setClosedStatusCount(closedStatusCount);
+		technologyStatusResponse.setInProgressStatusCount(inProgressStatusCount);
+		technologyStatusResponse.setNewStatusCount(newStatusCount);
+
+		 return technologyStatusResponse;
 	}
 
 
