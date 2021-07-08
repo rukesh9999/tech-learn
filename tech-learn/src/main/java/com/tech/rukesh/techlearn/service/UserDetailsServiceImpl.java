@@ -24,7 +24,7 @@ import com.ibm.icu.impl.USerializedSet;
 import com.tech.rukesh.techlearn.controller.TechnoloyController;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.model.UserRegistration;
-import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
+import com.tech.rukesh.techlearn.repository.RegistrationRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,15 +39,15 @@ import lombok.RequiredArgsConstructor;
 public class UserDetailsServiceImpl implements UserDetailsService  {
 	
 	@Autowired
-	private UserRegistrationRepository userRegistrationRepository;
+	private RegistrationRepository registrationRepository;
 	
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
+	final static Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		UserRegistration userRegistration   = userRegistrationRepository.findByEmail(username).orElseThrow(()-> new NoSuchUserExistsException("user doesnot exists"));
+		UserRegistration userRegistration   = registrationRepository.findByEmail(username).orElseThrow(()-> new NoSuchUserExistsException("user doesnot exists"));
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 

@@ -46,7 +46,7 @@ public class JWTProvider {
 	@Value("${jwt.expiration.time}")
 	private Long jwtExpirationInMillis;
 	
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
+	final static Logger logger = LoggerFactory.getLogger(JWTProvider.class);
 
 
 	@PostConstruct

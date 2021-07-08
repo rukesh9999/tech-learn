@@ -18,7 +18,7 @@ import com.tech.rukesh.techlearn.model.UserRegistration;
  *
  */
 @Repository
-public interface UserRegistrationRepository extends JpaRepository<UserRegistration, Integer>{
+public interface RegistrationRepository extends JpaRepository<UserRegistration, Integer>{
 
 	
 	Optional<UserRegistration> findByEmail(String email);

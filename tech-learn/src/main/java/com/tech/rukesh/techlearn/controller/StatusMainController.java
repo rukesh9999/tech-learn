@@ -32,15 +32,15 @@ public class StatusMainController {
 	@Autowired
 	private StatusMainService statusMainService;
 	
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
+	final static Logger logger = LoggerFactory.getLogger(StatusMainController.class);
 
 	
 	@PostMapping("/save")
-	public ResponseEntity<String> saveStatusMain(@Valid @RequestBody StatusMainRequest statusMainDto){
+	public ResponseEntity<String> saveStatusMain(@Valid @RequestBody StatusMainRequest statusMainRequest){
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		String status = statusMainService.saveStatusMain(statusMainDto);
+		String status = statusMainService.saveStatusMain(statusMainRequest);
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<String>(status,HttpStatus.OK);
+		return new ResponseEntity<String>(status,HttpStatus.CREATED);
 	}
 
 	@GetMapping("/all")

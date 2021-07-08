@@ -57,7 +57,7 @@ public class TechnoloyController {
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		List<TechnoloyResponse>  techlist = technoloyService.getAllTechnologies();
 		logger.info("End of..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		return new ResponseEntity<List<TechnoloyResponse>>(techlist,HttpStatus.OK);
+		return new ResponseEntity<List<TechnoloyResponse>>(techlist,HttpStatus.CREATED);
 
 	}
 	

@@ -30,7 +30,7 @@ public class StatusMainService {
 	@Autowired
 	private StatusMainRepository statusMainRepository;
 	
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyService.class);
+	final static Logger logger = LoggerFactory.getLogger(StatusMainService.class);
 	
 	/**
 	 * @author Rukesh
@@ -97,9 +97,7 @@ public class StatusMainService {
     {
  	    logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
     	StatusMainResponse statusmaindbdto  = getStatusMainById(statusMainUpdateRequest.getId());
-    	Optional<StatusMain> optstatusmain = statusMainRepository.findByName(statusMainUpdateRequest.getName());
-    	if(optstatusmain.isPresent())
-    	throw new StatusMainAlreadyExists("StatusMainAlreadyExists");
+    	
     	StatusMain statusMain=new StatusMain();
     	statusMain.setId(statusMainUpdateRequest.getId());
     	statusMain.setName(statusMainUpdateRequest.getName());

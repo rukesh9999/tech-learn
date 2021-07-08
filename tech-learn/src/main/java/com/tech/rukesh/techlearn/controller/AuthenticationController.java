@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 public class AuthenticationController {
 
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
+	final static Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
 	@Autowired
 	private AuthenticationService authenticationService;
@@ -51,7 +51,7 @@ public class AuthenticationController {
 		String status = authenticationService.registerUser(registrationRequest);
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		return new ResponseEntity<String>(status,HttpStatus.OK);
+		return new ResponseEntity<String>(status,HttpStatus.CREATED);
 	}
 	
 	

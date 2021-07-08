@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.tech.rukesh.techlearn.controller.TechnoloyController;
-import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
+import com.tech.rukesh.techlearn.repository.RegistrationRepository;
 import com.tech.rukesh.techlearn.security.JWTProvider;
 
 
@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Autowired
 	private UserDetailsService userDetailsService;
 	
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
+	final static Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

@@ -3,6 +3,8 @@
  */
 package com.tech.rukesh.techlearn.model;
 
+import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,43 +29,44 @@ import lombok.ToString;
  * @author Rukesh
  *
  */
-
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Getter
 @Setter
-@Data
 @Entity
-@Table(name = "mailacknowledgement",uniqueConstraints = {
- @UniqueConstraint(columnNames = "id")
+@Table(name="inbox_mails",uniqueConstraints = {
+	@UniqueConstraint(columnNames ="id")	
 })
-public class MailAcknowledgement {
+public class InboxMails {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	@Column(name="id",unique=true,nullable=false,length =10)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE )
+	@Column(name ="id",unique =true,nullable =false)
 	private Integer id;
 	
-	@Column(name ="from_address",unique=false,nullable=false,length=100)
-	private String fromAddress;
-	
-	@Column(name = "to_address",unique=false,nullable=false,length=100)
-	private String toAddress;
-	
-	@Column(name = "subject",unique=false,nullable=false,length=100)
+	@Column(name ="subject",unique =false,nullable =false)
 	private String subject;
 	
-	@Column(name = "body",unique=false,nullable=false,length=65536)
-	private String body;
+	@Column(name ="description",unique =false,nullable =false)
+	private String description;
 	
-	@Column(name = "typeOfMail",unique=false,nullable=false,length=100)
-	private String typeOfMail;
+	@Column(name ="from_address",unique =false,nullable =false)
+	private String fromAddress;
+	
+	@Column(name ="to_adddress",unique =false,nullable =false)
+	private String toAdddress;
+	
+	@Column(name ="mail_sent_date",unique =false,nullable =false)
+	private Date mailSentDate;
+	
+	@Column(name ="auto_convert_to_technology",unique =false,nullable =false)
+	private boolean autoConvertToTechnology;
 	
 	@ManyToOne(targetEntity=UserRegistration.class,cascade=CascadeType.ALL,fetch=FetchType.EAGER)
-	@JoinColumn(name="UserId",referencedColumnName = "user_id",unique =false,nullable =false)
+	@JoinColumn(name ="userId",referencedColumnName ="user_id")
 	private UserRegistration userRegistration;
-	
-
+		
 }

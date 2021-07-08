@@ -30,7 +30,7 @@ import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.UserRegistrationException;
 import com.tech.rukesh.techlearn.model.UserRegistration;
-import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
+import com.tech.rukesh.techlearn.repository.RegistrationRepository;
 import com.tech.rukesh.techlearn.security.JWTProvider;
 import com.tech.rukesh.techlearn.util.PasswordGenerator;
 
@@ -49,7 +49,7 @@ public class AuthenticationService {
 	private String fromAddress;
 	
 	@Autowired
-	private UserRegistrationRepository userRegistrationRepository;
+	private RegistrationRepository registrationRepository;
 	
 	@Autowired
 	private PasswordGenerator passwordGenerator;
@@ -72,7 +72,7 @@ public class AuthenticationService {
 	 
 	
 	
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
+	final static Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 	
 	
 	
@@ -80,13 +80,13 @@ public class AuthenticationService {
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		String generatedPassword = passwordGenerator.generatePassword();
-		Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(registrationRequest.getEmail());
+		Optional<UserRegistration> optUser = registrationRepository.findByEmail(registrationRequest.getEmail());
 		if(optUser.isPresent())
 		throw new UserAlreadyExistsException("UserAlreadyExists");
 		UserRegistration userRegistration = mapFromUserRegistrationRequest(registrationRequest);
 		userRegistration.setPassword(passwordEncoder.encode(generatedPassword));
 		try {
-		    userRegistrationRepository.save(userRegistration);
+		    registrationRepository.save(userRegistration);
 		}catch (Exception e) {
 			throw new UserRegistrationException(e.getMessage());
 		}
@@ -154,7 +154,7 @@ public class AuthenticationService {
 	  {
 		 User principle =   (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		 
-		 return userRegistrationRepository.findByEmail(principle.getUsername()).orElseThrow(()->new NoSuchUserExistsException("user doesnot exists "+principle.getUsername()));
+		 return registrationRepository.findByEmail(principle.getUsername()).orElseThrow(()->new NoSuchUserExistsException("user doesnot exists "+principle.getUsername()));
 	  }
 	
 	

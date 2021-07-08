@@ -107,5 +107,25 @@ public class ExceptionAdvice {
 		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
 	}
 	
+	@ExceptionHandler(BatchJobSettingsException.class)
+	public ResponseEntity<ErrorDto> handleBatchJobSettingsException(BatchJobSettingsException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(NoSuchBatchJobSettingsException.class)
+	public ResponseEntity<ErrorDto> handleNoSuchBatchJobSettingsException(NoSuchBatchJobSettingsException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(BatchJobSettingsAlreadyExistsException.class)
+	public ResponseEntity<ErrorDto> handleBatchJobSettingsAlreadyExistsException(BatchJobSettingsAlreadyExistsException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
 	
 }

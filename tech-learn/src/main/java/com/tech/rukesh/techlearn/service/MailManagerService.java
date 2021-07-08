@@ -21,7 +21,7 @@ import com.tech.rukesh.techlearn.model.MailAcknowledgement;
 import com.tech.rukesh.techlearn.model.Technoloy;
 import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.MailAcknowledgementRepository;
-import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
+import com.tech.rukesh.techlearn.repository.RegistrationRepository;
 import com.tech.rukesh.techlearn.util.MailBuilder;
 
 import lombok.RequiredArgsConstructor;
@@ -42,12 +42,12 @@ public class MailManagerService {
 	private MailAcknowledgementRepository mailAcknowledgementRepository;
 	
 	@Autowired
-	private UserRegistrationRepository userRegistrationRepository;
+	private RegistrationRepository registrationRepository;
 	
 	@Autowired
 	private JavaMailSender javaMailSender;
 	
-	final static Logger logger = LoggerFactory.getLogger(TechnoloyController.class);
+	final static Logger logger = LoggerFactory.getLogger(MailManagerService.class);
 
 	
 	public Boolean sendAccountCreatedAcknowledgeMail(MailAcknowledgementDto mailAcknowledgementDto,String generatedPassword)
@@ -129,7 +129,7 @@ public class MailManagerService {
 	
 	public MailAcknowledgement mapFromDto(MailAcknowledgementDto mailAcknowledgementDto)
 	{
-		Optional<UserRegistration> optUser = userRegistrationRepository.findById(mailAcknowledgementDto.getUserId());
+		Optional<UserRegistration> optUser = registrationRepository.findById(mailAcknowledgementDto.getUserId());
 		
 		return MailAcknowledgement.builder()
 				.fromAddress(mailAcknowledgementDto.getFromAddress())

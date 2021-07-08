@@ -22,7 +22,7 @@ import com.tech.rukesh.techlearn.model.Technoloy;
 import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.CommentsRepository;
 import com.tech.rukesh.techlearn.repository.StatusMainRepository;
-import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
+import com.tech.rukesh.techlearn.repository.RegistrationRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,7 +41,7 @@ public class MailBuilder {
 	private TemplateEngine templateEngine;
 	
 	@Autowired
-	private UserRegistrationRepository userRegistrationRepository;
+	private RegistrationRepository registrationRepository;
 	
 	@Autowired
 	private StatusMainRepository statusMainRepository;
@@ -57,7 +57,7 @@ public class MailBuilder {
 	public String buildRegistration(Integer userid,String generatedPassword)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		Optional<UserRegistration> userRegistration =  userRegistrationRepository.findById(userid);
+		Optional<UserRegistration> userRegistration =  registrationRepository.findById(userid);
 					
 		Context context =new Context();
 		UserRegistration userregistration = userRegistration.get();
@@ -88,7 +88,7 @@ public class MailBuilder {
 		else 
 	    fileName="TechnologyClosedMailTemplate";
 		
-		Optional<UserRegistration> userRegistration =  userRegistrationRepository.findById(userId);
+		Optional<UserRegistration> userRegistration =  registrationRepository.findById(userId);
 		Optional<StatusMain> optStatus =  statusMainRepository.findById(technoloy.getStatusMain().getId());
 		List<Comments>  ListOfComments =  commentsRepository.findByTechnoloyId(technoloy.getId());
 		if(ListOfComments.size()>0)
