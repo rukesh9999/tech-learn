@@ -42,7 +42,7 @@ import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.CommentsRepository;
 import com.tech.rukesh.techlearn.repository.StatusMainRepository;
 import com.tech.rukesh.techlearn.repository.TechnologyRepository;
-import com.tech.rukesh.techlearn.repository.RegistrationRepository;
+import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
 import com.tech.rukesh.techlearn.util.RandomCodeGenerator;
 import com.tech.rukesh.techlearn.util.StatusMap;
 
@@ -84,7 +84,7 @@ public class TechnoloyService {
 	private CommentsRepository  commentsRepository;
 	
 	@Autowired
-	private RegistrationRepository registrationRepository;
+	private UserRegistrationRepository userRegistrationRepository;
 	
 	@Autowired
 	private MailManagerService mailManagerService;
@@ -268,7 +268,7 @@ public class TechnoloyService {
 	
 	  	StatusMain statusmain = statusMainRepository.findById(techsave.getStatusMain().getId()).orElseThrow(()->new NoSuchStatusMainException("No such status exists"));
 	  	
-	  	UserRegistration userRegistration =  registrationRepository.findById(techsave.getUserRegistration().getUserId()).orElseThrow(()->new NoSuchUserExistsException("user doesnot exits"));
+	  	UserRegistration userRegistration =  userRegistrationRepository.findById(techsave.getUserRegistration().getUserId()).orElseThrow(()->new NoSuchUserExistsException("user doesnot exits"));
 	  		  	 
 	  	String firstName = userRegistration.getFirstName();
 	  	String lastName = userRegistration.getLastName();

@@ -25,12 +25,12 @@ import com.tech.rukesh.techlearn.dto.AuthenticationResponse;
 import com.tech.rukesh.techlearn.dto.LoginRequest;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.dto.RefreshTokenRequest;
-import com.tech.rukesh.techlearn.dto.RegistrationRequest;
+import com.tech.rukesh.techlearn.dto.UserRegistrationRequest;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.UserRegistrationException;
 import com.tech.rukesh.techlearn.model.UserRegistration;
-import com.tech.rukesh.techlearn.repository.RegistrationRepository;
+import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
 import com.tech.rukesh.techlearn.security.JWTProvider;
 import com.tech.rukesh.techlearn.util.PasswordGenerator;
 
@@ -49,7 +49,7 @@ public class AuthenticationService {
 	private String fromAddress;
 	
 	@Autowired
-	private RegistrationRepository registrationRepository;
+	private UserRegistrationRepository userRegistrationRepository;
 	
 	@Autowired
 	private PasswordGenerator passwordGenerator;
@@ -76,17 +76,17 @@ public class AuthenticationService {
 	
 	
 	
-	public String registerUser(RegistrationRequest registrationRequest)
+	public String registerUser(UserRegistrationRequest userRegistrationRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		String generatedPassword = passwordGenerator.generatePassword();
-		Optional<UserRegistration> optUser = registrationRepository.findByEmail(registrationRequest.getEmail());
+		Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(userRegistrationRequest.getEmail());
 		if(optUser.isPresent())
 		throw new UserAlreadyExistsException("UserAlreadyExists");
-		UserRegistration userRegistration = mapFromUserRegistrationRequest(registrationRequest);
+		UserRegistration userRegistration = mapFromUserRegistrationRequest(userRegistrationRequest);
 		userRegistration.setPassword(passwordEncoder.encode(generatedPassword));
 		try {
-		    registrationRepository.save(userRegistration);
+			userRegistrationRepository.save(userRegistration);
 		}catch (Exception e) {
 			throw new UserRegistrationException(e.getMessage());
 		}
@@ -154,16 +154,16 @@ public class AuthenticationService {
 	  {
 		 User principle =   (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		 
-		 return registrationRepository.findByEmail(principle.getUsername()).orElseThrow(()->new NoSuchUserExistsException("user doesnot exists "+principle.getUsername()));
+		 return userRegistrationRepository.findByEmail(principle.getUsername()).orElseThrow(()->new NoSuchUserExistsException("user doesnot exists "+principle.getUsername()));
 	  }
 	
 	
-	public UserRegistration mapFromUserRegistrationRequest(RegistrationRequest registrationRequest)
+	public UserRegistration mapFromUserRegistrationRequest(UserRegistrationRequest userRegistrationRequest)
 	{
 		return UserRegistration.builder()
-				.firstName(registrationRequest.getFirstName())
-				.lastName(registrationRequest.getLastName())
-				.email(registrationRequest.getEmail())
+				.firstName(userRegistrationRequest.getFirstName())
+				.lastName(userRegistrationRequest.getLastName())
+				.email(userRegistrationRequest.getEmail())
 				.build();
 	}
 	

@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -22,8 +21,7 @@ import com.tech.rukesh.techlearn.model.Technoloy;
 import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.CommentsRepository;
 import com.tech.rukesh.techlearn.repository.StatusMainRepository;
-import com.tech.rukesh.techlearn.repository.RegistrationRepository;
-
+import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -41,7 +39,7 @@ public class MailBuilder {
 	private TemplateEngine templateEngine;
 	
 	@Autowired
-	private RegistrationRepository registrationRepository;
+	private UserRegistrationRepository userRegistrationRepository;
 	
 	@Autowired
 	private StatusMainRepository statusMainRepository;
@@ -57,7 +55,7 @@ public class MailBuilder {
 	public String buildRegistration(Integer userid,String generatedPassword)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-		Optional<UserRegistration> userRegistration =  registrationRepository.findById(userid);
+		Optional<UserRegistration> userRegistration =  userRegistrationRepository.findById(userid);
 					
 		Context context =new Context();
 		UserRegistration userregistration = userRegistration.get();
@@ -88,7 +86,7 @@ public class MailBuilder {
 		else 
 	    fileName="TechnologyClosedMailTemplate";
 		
-		Optional<UserRegistration> userRegistration =  registrationRepository.findById(userId);
+		Optional<UserRegistration> userRegistration =  userRegistrationRepository.findById(userId);
 		Optional<StatusMain> optStatus =  statusMainRepository.findById(technoloy.getStatusMain().getId());
 		List<Comments>  ListOfComments =  commentsRepository.findByTechnoloyId(technoloy.getId());
 		if(ListOfComments.size()>0)

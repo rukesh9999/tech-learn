@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.tech.rukesh.techlearn.controller.TechnoloyController;
-import com.tech.rukesh.techlearn.repository.RegistrationRepository;
 import com.tech.rukesh.techlearn.security.JWTProvider;
 
 

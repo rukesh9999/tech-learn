@@ -15,13 +15,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tech.rukesh.techlearn.controller.TechnoloyController;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.model.MailAcknowledgement;
 import com.tech.rukesh.techlearn.model.Technoloy;
 import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.MailAcknowledgementRepository;
-import com.tech.rukesh.techlearn.repository.RegistrationRepository;
+import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
 import com.tech.rukesh.techlearn.util.MailBuilder;
 
 import lombok.RequiredArgsConstructor;
@@ -42,7 +41,7 @@ public class MailManagerService {
 	private MailAcknowledgementRepository mailAcknowledgementRepository;
 	
 	@Autowired
-	private RegistrationRepository registrationRepository;
+	private UserRegistrationRepository userRegistrationRepository;
 	
 	@Autowired
 	private JavaMailSender javaMailSender;
@@ -129,7 +128,7 @@ public class MailManagerService {
 	
 	public MailAcknowledgement mapFromDto(MailAcknowledgementDto mailAcknowledgementDto)
 	{
-		Optional<UserRegistration> optUser = registrationRepository.findById(mailAcknowledgementDto.getUserId());
+		Optional<UserRegistration> optUser = userRegistrationRepository.findById(mailAcknowledgementDto.getUserId());
 		
 		return MailAcknowledgement.builder()
 				.fromAddress(mailAcknowledgementDto.getFromAddress())

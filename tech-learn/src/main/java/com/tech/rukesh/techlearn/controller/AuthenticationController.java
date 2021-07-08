@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tech.rukesh.techlearn.dto.AuthenticationResponse;
 import com.tech.rukesh.techlearn.dto.LoginRequest;
 import com.tech.rukesh.techlearn.dto.RefreshTokenRequest;
-import com.tech.rukesh.techlearn.dto.RegistrationRequest;
-import com.tech.rukesh.techlearn.model.UserRegistration;
+import com.tech.rukesh.techlearn.dto.UserRegistrationRequest;
 import com.tech.rukesh.techlearn.service.AuthenticationService;
 import com.tech.rukesh.techlearn.service.RefreshTokenService;
 
@@ -44,11 +42,11 @@ public class AuthenticationController {
 	private RefreshTokenService refreshTokenService;
 	
 	@PostMapping("/register")
-	public ResponseEntity<String> registerUser(@Valid @RequestBody RegistrationRequest registrationRequest)
+	public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistrationRequest userRegistrationRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		String status = authenticationService.registerUser(registrationRequest);
+		String status = authenticationService.registerUser(userRegistrationRequest);
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		return new ResponseEntity<String>(status,HttpStatus.CREATED);
