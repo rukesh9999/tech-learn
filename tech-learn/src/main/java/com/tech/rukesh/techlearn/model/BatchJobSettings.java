@@ -42,20 +42,23 @@ public class BatchJobSettings {
 	@Column(name ="id",unique =true,nullable =false)
 	private Integer id;
 	
-	@Column(name ="port_no",unique =true,nullable =false)
+	@Column(name ="port_no",unique =false,nullable =false)
 	private Integer portNo;
 	
-	@Column(name ="protocal",unique =true,nullable =false)
+	@Column(name ="protocal",unique =false,nullable =false)
 	private String protocal;
 	
-	@Column(name ="host",unique =true,nullable =false)
+	@Column(name ="host",unique =false,nullable =false)
 	private String host;
 	
-	@Column(name ="user_name",unique =true,nullable =false)
+	@Column(name ="user_name",unique =false,nullable =false)
 	private String userName;
 	
-	@Column(name ="password",unique =true,nullable =false)
+	@Column(name ="password",unique =false,nullable =false)
 	private String password;
+	
+	@Column(name ="enable_autoConvert_to_technology",unique=false,nullable =false)
+	private Boolean  enableAutoConvertToTechnology;
 	
 	@ManyToOne(targetEntity =UserRegistration.class,cascade =CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinColumn(name ="userId",referencedColumnName ="user_id")

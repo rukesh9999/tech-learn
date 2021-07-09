@@ -62,8 +62,8 @@ public class InboxMails {
 	@Column(name ="mail_sent_date",unique =false,nullable =false)
 	private Date mailSentDate;
 	
-	@Column(name ="auto_convert_to_technology",unique =false,nullable =false)
-	private boolean autoConvertToTechnology;
+	@Column(name ="converted_to_technology",unique =false,nullable =false)
+	private boolean convertedToTechnology;
 	
 	@ManyToOne(targetEntity=UserRegistration.class,cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	@JoinColumn(name ="userId",referencedColumnName ="user_id")

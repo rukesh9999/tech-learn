@@ -13,8 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tech.rukesh.techlearn.dto.InboxMailsDto;
 import com.tech.rukesh.techlearn.dto.InboxMailsResponse;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
+import com.tech.rukesh.techlearn.exception.TechLearnException;
+import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.model.InboxMails;
 import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.InboxMailsRepository;
@@ -56,6 +59,48 @@ public class InboxMailsService {
 	
 	
 	
+	public void saveInboxMailsFromBatchJob(InboxMailsDto inboxMailsDto)
+	{
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+
+		InboxMails inboxMails  =  mapFromInboxMailsDto(inboxMailsDto);
+		
+		try {
+			    inboxMailsRepository.save(inboxMails);			
+		    }catch (Exception e) { 
+		    	
+			  throw new TechLearnException(e.getMessage());
+		    }
+		
+	    logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+	}
+	
+	
+	
+	
+	/**
+	 * @param inboxMailsDto
+	 * @return 
+	 */
+	private InboxMails mapFromInboxMailsDto(InboxMailsDto inboxMailsDto) {
+		  
+		Optional<UserRegistration> userRegistrationOpt = userRegistrationRepository.findById(inboxMailsDto.getUserId());
+		
+		if(!userRegistrationOpt.isPresent())
+		throw new NoSuchUserExistsException("User does not exists");
+		  
+		return InboxMails.builder()
+				.convertedToTechnology(inboxMailsDto.isAutoConvertToTechnology())
+				.subject(inboxMailsDto.getSubject())
+				.description(inboxMailsDto.getDescription())
+				.fromAddress(inboxMailsDto.getFromAddress())
+				.toAdddress(inboxMailsDto.getToAdddress())
+				.userRegistration(userRegistrationOpt.get())
+				.build();
+	}
+
+
+
 	public InboxMailsResponse mapToInboxMailsResponse(InboxMails InboxMails)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
@@ -77,7 +122,7 @@ public class InboxMailsService {
 				.fromAddress(InboxMails.getFromAddress())
 				.toAdddress(InboxMails.getToAdddress())
 				.mailSentDate(InboxMails.getMailSentDate())
-				.autoConvertToTechnology(InboxMails.isAutoConvertToTechnology())
+				.autoConvertToTechnology(InboxMails.isConvertedToTechnology())
 				.mailSentBy(fullName)
 				.build();
 	}
