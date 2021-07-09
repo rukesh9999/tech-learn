@@ -3,6 +3,7 @@ package com.tech.rukesh.techlearn.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
+import com.tech.rukesh.techlearn.dto.InboxMailsDto;
 import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.dto.TechnologyCommentsRequest;
 import com.tech.rukesh.techlearn.dto.TechnologyStatusResponse;
@@ -516,7 +518,58 @@ public class TechnoloyService {
 
 
 	
+	 public void saveTechnologyFromBatchJob(InboxMailsDto inboxMailsDto)
+	 {
+		 
+		 Technoloy technoloy =  mapFromTechnoloyRequestFromBatchJob(inboxMailsDto);
+		 
+		 try {
+			    technologyRepository.save(technoloy);
+		     }catch (Exception e) {
+			   throw new TechnoloyException(e.getMessage());
+		    }
+		 
+		 
+		    MailAcknowledgementDto mailAcknowledgementDto = new MailAcknowledgementDto();
+			mailAcknowledgementDto.setUserId(technoloy.getUserRegistration().getUserId());
+			mailAcknowledgementDto.setToAddress(technoloy.getUserRegistration().getEmail());
+			mailAcknowledgementDto.setTypeOfMail("TechnologyCreation");
+			mailAcknowledgementDto.setSubject("New Technology Created");
+			mailAcknowledgementDto.setFromAddress(fromAddress);
+			
+			mailManagerService.sendTechnologyAcknowledgeRelatedMail(mailAcknowledgementDto,technoloy);
+		 
+	 }
 	 
+	 
+	 
+    public Technoloy mapFromTechnoloyRequestFromBatchJob(InboxMailsDto inboxMailsDto) {
+    	
+    	  Optional<UserRegistration> userRegistrationOpt  =  userRegistrationRepository.findById(inboxMailsDto.getUserId());
+		  if(!userRegistrationOpt.isPresent())
+	      throw new NoSuchUserExistsException("User does not exists");
+		  
+		  Date createdDate = new Date(System.currentTimeMillis());
+		  
+		  Date modifiedDate = new Date(System.currentTimeMillis());
+		  
+		  Date expectedCompletionDate = new Date();
+		  
+	      Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(StatusMap.New);	
+			
+	      return Technoloy.builder()
+	    		  .name(inboxMailsDto.getSubject())
+	    		  .description(inboxMailsDto.getDescription())
+	    		  .code(randomCodeGenerator.generateRandomCode())
+	    		  .createdDate(createdDate)
+	    		  .modifiedDate(modifiedDate)
+	    		  .expectedCompletionDate(expectedCompletionDate)
+	    		  .totalTimeToComplete("1 Month")
+	    		  .statusMain(statusMainOpt.get())
+	    		  .userRegistration(userRegistrationOpt.get())
+	    		  .build();
+		     
+    }
 	
 	
 }
