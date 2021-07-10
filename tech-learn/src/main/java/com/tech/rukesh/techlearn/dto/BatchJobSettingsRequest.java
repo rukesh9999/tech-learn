@@ -3,6 +3,9 @@
  */
 package com.tech.rukesh.techlearn.dto;
 
+import javax.persistence.Column;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -43,5 +46,8 @@ public class BatchJobSettingsRequest {
 	@NotBlank(message = "password is required")
 	private String password;
 	
+	
+	@NotNull(message = "enableAutoConvertToTechnology is required")
+	private Boolean  enableAutoConvertToTechnology;
 	
 }

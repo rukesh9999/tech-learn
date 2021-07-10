@@ -128,4 +128,20 @@ public class ExceptionAdvice {
 		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
 	}
 	
+	@ExceptionHandler(NoSuchInboxMailException.class)
+	public ResponseEntity<ErrorDto> handleNoSuchInboxMailException(NoSuchInboxMailException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(InboxMailException.class)
+	public ResponseEntity<ErrorDto> handleInboxMailException(InboxMailException te)
+	{
+		ErrorDto ErrorDto =new ErrorDto(te.getMessage(),HttpStatus.NOT_FOUND.value());
+		return new ResponseEntity<ErrorDto>(ErrorDto,HttpStatus.NOT_FOUND);
+	}
+	
+	
+	
 }

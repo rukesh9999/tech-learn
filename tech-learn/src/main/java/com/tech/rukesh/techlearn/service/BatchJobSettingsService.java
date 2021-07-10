@@ -148,6 +148,7 @@ public class BatchJobSettingsService {
 		.password(batchJobSettingsRequest.getPassword())
 		.host(batchJobSettingsRequest.getHost())
 		.userRegistration(userRegistration)
+		.enableAutoConvertToTechnology(batchJobSettingsRequest.getEnableAutoConvertToTechnology())
 		.build();
 	  
 		

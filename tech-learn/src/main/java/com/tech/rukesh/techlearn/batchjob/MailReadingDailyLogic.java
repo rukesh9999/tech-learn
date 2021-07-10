@@ -4,6 +4,8 @@
 package com.tech.rukesh.techlearn.batchjob;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -20,6 +22,7 @@ import javax.mail.search.FlagTerm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.tech.rukesh.techlearn.controller.TechnoloyController;
@@ -48,36 +51,29 @@ public class MailReadingDailyLogic {
 	private TechnoloyService technoloyService;
 	
 	
-	
+    //@Scheduled(fixedRate =5000)
 	public void getAllBatchJobSettings()
 	{
 		List<BatchJobSettings>   listOfBatchJobSettings = (List<BatchJobSettings>) batchJobSettingsRepository.findAll();
 		
 		for(BatchJobSettings batchJobSettings : listOfBatchJobSettings)
 		{
-			  String host =    batchJobSettings.getHost();
-			  Integer portno = batchJobSettings.getPortNo();
-			  String protocal =  batchJobSettings.getProtocal();
-			  String userName =  batchJobSettings.getUserName();
-			  String password =  batchJobSettings.getPassword();
-			  Integer userId = batchJobSettings.getUserRegistration().getUserId();
-			  Boolean EnableAutoConvertToTechnology = batchJobSettings.getEnableAutoConvertToTechnology();
 			  
-			  this.connectToMailServer(host, portno, protocal, userName, password,userId,EnableAutoConvertToTechnology);
+			  this.connectToMailServer(batchJobSettings);
 		}
 		
 	}
 
 	
 	
-	// @Scheduled(fixedRate =5000)
-	 public void connectToMailServer(String host,Integer portno, String protocal,String userName,String password,Integer userId,Boolean EnableAutoConvertToTechnology)
+	
+	 public void connectToMailServer(BatchJobSettings batchJobSettings)
 	 {
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		 Properties properties = new Properties();
 		 Properties props = System.getProperties();
-		 props.setProperty("mail.imap.host", host);
+		 props.setProperty("mail.imap.host", batchJobSettings.getHost());
 		 props.setProperty("mail.imap.port", "993");
 		 props.setProperty("mail.imap.connectiontimeout", "5000");
 		 props.setProperty("mail.imap.timeout", "5000");
@@ -86,13 +82,13 @@ public class MailReadingDailyLogic {
 		 Session emailsession = Session.getDefaultInstance(properties);
 		 try {
 		 
-		 Store store = emailsession.getStore(protocal);
+		 Store store = emailsession.getStore(batchJobSettings.getProtocal());
 		 logger.info("Before connected to store");		 
-		 store.connect(host, userName, password);	
+		 store.connect(batchJobSettings.getHost(), batchJobSettings.getUserName(), batchJobSettings.getPassword());	
 		 logger.info("After connected to store");
 
 		
-		 readMails(store,userId,EnableAutoConvertToTechnology);	
+		 this.readMails(store,batchJobSettings);	
 		 logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		 }catch (MessagingException e) {
@@ -102,7 +98,7 @@ public class MailReadingDailyLogic {
 	
 
 	 
-	 public void readMails(Store store,Integer userId,Boolean EnableAutoConvertToTechnology) throws MessagingException
+	 public void readMails(Store store,BatchJobSettings batchJobSettings) throws MessagingException
 	 {
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		 Folder emailFolder  = store.getFolder("INBOX");
@@ -121,8 +117,8 @@ public class MailReadingDailyLogic {
 			 System.out.println("description====="+ message.getDescription());
 			
 			 try {
-				 Multipart multipart =  (Multipart) message.getContent();
 				
+				 Multipart multipart =  (Multipart) message.getContent();							  
 				 System.out.println("content====="+ multipart.getBodyPart(0));
 				 System.out.println("ContentType====="+ multipart.getContentType());
 			} catch (IOException e) {
@@ -134,24 +130,26 @@ public class MailReadingDailyLogic {
 			}
 
 			 Address[] from = message.getFrom();
-			 Address[] replyto = message.getReplyTo();
+			
 			 System.out.println("from====="+ from[i]);
-			 System.out.println("replyto====="+ replyto[i]);
+			 
 			 message.setFlag(Flags.Flag.SEEN, true);
 			 
 			 InboxMailsDto inboxMailsDto = new InboxMailsDto();
 			 
-			 inboxMailsDto.setAutoConvertToTechnology(false);
-			 inboxMailsDto.setUserId(userId);
+			 inboxMailsDto.setConvertedToTechnology(false);
+			 inboxMailsDto.setUserId(batchJobSettings.getUserRegistration().getUserId());
 			 inboxMailsDto.setSubject(message.getSubject());
-			 inboxMailsDto.setDescription(message.getDescription());
+			 inboxMailsDto.setDescription(message.getSubject());
 			 inboxMailsDto.setFromAddress(message.getFrom()[0].toString());
-			 inboxMailsDto.setToAdddress(message.getReplyTo()[0].toString());
+			 inboxMailsDto.setToAdddress(batchJobSettings.getUserName());
 			 inboxMailsDto.setMailSentDate(message.getSentDate());
+		
+			 Integer inboxMailsId =  inboxMailsService.saveInboxMailsFromBatchJob(inboxMailsDto);
 			 
-			 inboxMailsService.saveInboxMailsFromBatchJob(inboxMailsDto);
+			 inboxMailsDto.setId(inboxMailsId);
 			 
-			 if(EnableAutoConvertToTechnology)
+			 if(batchJobSettings.getEnableAutoConvertToTechnology())
 			 {
 			    
 				 technoloyService.saveTechnologyFromBatchJob(inboxMailsDto);

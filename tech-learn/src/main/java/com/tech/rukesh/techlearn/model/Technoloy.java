@@ -73,7 +73,7 @@ public class Technoloy {
     private StatusMain statusMain;
     
     @ManyToOne(targetEntity=UserRegistration.class,cascade =CascadeType.ALL,fetch =FetchType.EAGER)
-    @JoinColumn(name="CreatedBy",referencedColumnName ="user_id")
+    @JoinColumn(name="CreatedBy",referencedColumnName ="user_id",unique =false ,nullable = false)
     private UserRegistration userRegistration;
     
     

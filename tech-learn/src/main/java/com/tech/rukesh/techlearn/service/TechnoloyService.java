@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,17 +32,26 @@ import com.tech.rukesh.techlearn.dto.TechnologyCommentsRequest;
 import com.tech.rukesh.techlearn.dto.TechnologyStatusResponse;
 import com.tech.rukesh.techlearn.dto.TechnoloyRequest;
 import com.tech.rukesh.techlearn.dto.TechnoloyResponse;
+import com.tech.rukesh.techlearn.exception.BatchJobSettingsException;
+import com.tech.rukesh.techlearn.exception.InboxMailException;
 import com.tech.rukesh.techlearn.exception.InvalidFormatException;
+import com.tech.rukesh.techlearn.exception.NoSuchBatchJobSettingsException;
+import com.tech.rukesh.techlearn.exception.NoSuchInboxMailException;
 import com.tech.rukesh.techlearn.exception.NoSuchStatusMainException;
 import com.tech.rukesh.techlearn.exception.NoSuchTechnoloyExistsException;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
+import com.tech.rukesh.techlearn.exception.TechLearnException;
 import com.tech.rukesh.techlearn.exception.TechnoloyAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.TechnoloyException;
+import com.tech.rukesh.techlearn.model.BatchJobSettings;
 import com.tech.rukesh.techlearn.model.Comments;
+import com.tech.rukesh.techlearn.model.InboxMails;
 import com.tech.rukesh.techlearn.model.StatusMain;
 import com.tech.rukesh.techlearn.model.Technoloy;
 import com.tech.rukesh.techlearn.model.UserRegistration;
+import com.tech.rukesh.techlearn.repository.BatchJobSettingsRepository;
 import com.tech.rukesh.techlearn.repository.CommentsRepository;
+import com.tech.rukesh.techlearn.repository.InboxMailsRepository;
 import com.tech.rukesh.techlearn.repository.StatusMainRepository;
 import com.tech.rukesh.techlearn.repository.TechnologyRepository;
 import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
@@ -93,6 +103,9 @@ public class TechnoloyService {
 	
 	@Autowired
 	private AuthenticationService authenticationService;
+	
+	@Autowired
+	private InboxMailsRepository inboxMailsRepository;
 	
 	@Value("${mail.fromAddress}")
 	private String fromAddress;
@@ -528,14 +541,25 @@ public class TechnoloyService {
 		     }catch (Exception e) {
 			   throw new TechnoloyException(e.getMessage());
 		    }
+		     
+		    InboxMails   inboxMails =   inboxMailsRepository.findById(inboxMailsDto.getId())
+		       .orElseThrow(()->new NoSuchInboxMailException("No Such InboxMail Exists"));
 		 
-		 
+		    inboxMails.setConvertedToTechnology(true);
+		    
+		    try {
+		       inboxMailsRepository.save(inboxMails);
+		    }catch (Exception e) {
+		    	 throw new InboxMailException(e.getMessage());
+			}
+		    
 		    MailAcknowledgementDto mailAcknowledgementDto = new MailAcknowledgementDto();
 			mailAcknowledgementDto.setUserId(technoloy.getUserRegistration().getUserId());
 			mailAcknowledgementDto.setToAddress(technoloy.getUserRegistration().getEmail());
 			mailAcknowledgementDto.setTypeOfMail("TechnologyCreation");
 			mailAcknowledgementDto.setSubject("New Technology Created");
 			mailAcknowledgementDto.setFromAddress(fromAddress);
+			
 			
 			mailManagerService.sendTechnologyAcknowledgeRelatedMail(mailAcknowledgementDto,technoloy);
 		 
@@ -553,7 +577,12 @@ public class TechnoloyService {
 		  
 		  Date modifiedDate = new Date(System.currentTimeMillis());
 		  
-		  Date expectedCompletionDate = new Date();
+		  Calendar calender = Calendar.getInstance();
+		  calender.setTime(createdDate);
+		  calender.add(Calendar.DAY_OF_MONTH,31);
+		  Date  expectedCompletionDate =  calender.getTime();
+		  
+		  String timeToComplete = calculateTotalTime(createdDate,expectedCompletionDate);
 		  
 	      Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(StatusMap.New);	
 			
@@ -564,7 +593,7 @@ public class TechnoloyService {
 	    		  .createdDate(createdDate)
 	    		  .modifiedDate(modifiedDate)
 	    		  .expectedCompletionDate(expectedCompletionDate)
-	    		  .totalTimeToComplete("1 Month")
+	    		  .totalTimeToComplete(timeToComplete)
 	    		  .statusMain(statusMainOpt.get())
 	    		  .userRegistration(userRegistrationOpt.get())
 	    		  .build();

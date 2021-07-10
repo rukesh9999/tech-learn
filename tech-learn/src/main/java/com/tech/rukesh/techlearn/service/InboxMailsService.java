@@ -15,15 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tech.rukesh.techlearn.dto.InboxMailsDto;
 import com.tech.rukesh.techlearn.dto.InboxMailsResponse;
+import com.tech.rukesh.techlearn.exception.InboxMailException;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
 import com.tech.rukesh.techlearn.exception.TechLearnException;
-import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.model.InboxMails;
 import com.tech.rukesh.techlearn.model.UserRegistration;
 import com.tech.rukesh.techlearn.repository.InboxMailsRepository;
 import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
-import com.tech.rukesh.techlearn.security.JwtAuthenticationFilter;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -59,20 +57,22 @@ public class InboxMailsService {
 	
 	
 	
-	public void saveInboxMailsFromBatchJob(InboxMailsDto inboxMailsDto)
+	public Integer saveInboxMailsFromBatchJob(InboxMailsDto inboxMailsDto)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		InboxMails inboxMails  =  mapFromInboxMailsDto(inboxMailsDto);
-		
+		 InboxMails inboxMails  =  mapFromInboxMailsDto(inboxMailsDto);
+		 Integer inboxMailsId =null;
 		try {
-			    inboxMailsRepository.save(inboxMails);			
+			 inboxMailsId =   inboxMailsRepository.save(inboxMails).getId();			
 		    }catch (Exception e) { 
 		    	
-			  throw new TechLearnException(e.getMessage());
+			  throw new InboxMailException(e.getMessage());
 		    }
 		
 	    logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+	    
+	    return inboxMailsId;
 	}
 	
 	
@@ -90,12 +90,13 @@ public class InboxMailsService {
 		throw new NoSuchUserExistsException("User does not exists");
 		  
 		return InboxMails.builder()
-				.convertedToTechnology(inboxMailsDto.isAutoConvertToTechnology())
+				.convertedToTechnology(inboxMailsDto.isConvertedToTechnology())
 				.subject(inboxMailsDto.getSubject())
 				.description(inboxMailsDto.getDescription())
 				.fromAddress(inboxMailsDto.getFromAddress())
 				.toAdddress(inboxMailsDto.getToAdddress())
 				.userRegistration(userRegistrationOpt.get())
+				.mailSentDate(inboxMailsDto.getMailSentDate())
 				.build();
 	}
 
