@@ -61,7 +61,7 @@ public class BatchJobSettings {
 	private Boolean  enableAutoConvertToTechnology;
 	
 	@ManyToOne(targetEntity =UserRegistration.class,cascade =CascadeType.ALL,fetch = FetchType.EAGER)
-	@JoinColumn(name ="userId",referencedColumnName ="user_id")
+	@JoinColumn(name ="userId",referencedColumnName ="user_id",unique =false ,nullable = false)
 	private UserRegistration userRegistration;
 	
 	

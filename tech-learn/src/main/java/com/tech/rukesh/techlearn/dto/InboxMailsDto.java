@@ -26,6 +26,8 @@ import lombok.ToString;
 @Data
 public class InboxMailsDto {
 
+	private Integer id;
+	
 	private String subject;
 	
 	private String description;
@@ -36,7 +38,9 @@ public class InboxMailsDto {
 	
 	private Date mailSentDate;
 	
-	private boolean autoConvertToTechnology;
+	private boolean convertedToTechnology;
 	
 	private Integer UserId;
+	
+	
 }

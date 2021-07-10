@@ -15,7 +15,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,6 +63,7 @@ public class InboxMails {
 	@Column(name ="to_adddress",unique =false,nullable =false)
 	private String toAdddress;
 	
+	
 	@Column(name ="mail_sent_date",unique =false,nullable =false)
 	private Date mailSentDate;
 	
@@ -66,7 +71,7 @@ public class InboxMails {
 	private boolean convertedToTechnology;
 	
 	@ManyToOne(targetEntity=UserRegistration.class,cascade=CascadeType.ALL,fetch=FetchType.EAGER)
-	@JoinColumn(name ="userId",referencedColumnName ="user_id")
+	@JoinColumn(name ="userId",referencedColumnName ="user_id",unique =false ,nullable = false)
 	private UserRegistration userRegistration;
 		
 }
