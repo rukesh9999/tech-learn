@@ -107,6 +107,23 @@ public class MailBuilder {
 
 		return templateEngine.process(fileName, context);
 	}
+
+
+	public String  buildForgotPasswordMail(Integer userId,String token) {
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+		
+		Optional<UserRegistration> userRegistration =  userRegistrationRepository.findById(userId);		
+		Context context =new Context();
+		UserRegistration userregistration = userRegistration.get();
+		context.setVariable("firstName", userregistration.getFirstName());
+		context.setVariable("lastName", userregistration.getLastName());
+		context.setVariable("token",token);
+		String forgotpasswordurl = url+"?token="+token;
+		context.setVariable("url", forgotpasswordurl);
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+
+		return templateEngine.process("ForgotPasswordMailTemplate", context);
+	}
 	
 	
 }

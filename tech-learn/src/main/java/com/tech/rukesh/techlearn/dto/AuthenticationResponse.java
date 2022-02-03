@@ -21,13 +21,10 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-@Getter
-@Setter
 @Data
 public class AuthenticationResponse {
 
-	private String athenticationToken;
+	private String authenticationToken;
 	private String refreshToken;
 	private Instant expiresAt;
 	private String userName;

@@ -4,8 +4,10 @@
 package com.tech.rukesh.techlearn.service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +29,13 @@ import com.tech.rukesh.techlearn.dto.MailAcknowledgementDto;
 import com.tech.rukesh.techlearn.dto.RefreshTokenRequest;
 import com.tech.rukesh.techlearn.dto.UserRegistrationRequest;
 import com.tech.rukesh.techlearn.exception.NoSuchUserExistsException;
+import com.tech.rukesh.techlearn.exception.TechLearnException;
 import com.tech.rukesh.techlearn.exception.UserAlreadyExistsException;
 import com.tech.rukesh.techlearn.exception.UserRegistrationException;
+import com.tech.rukesh.techlearn.model.PasswordResetToken;
 import com.tech.rukesh.techlearn.model.UserRegistration;
+import com.tech.rukesh.techlearn.repository.MailAcknowledgementRepository;
+import com.tech.rukesh.techlearn.repository.PasswordResetTokenRepository;
 import com.tech.rukesh.techlearn.repository.UserRegistrationRepository;
 import com.tech.rukesh.techlearn.security.JWTProvider;
 import com.tech.rukesh.techlearn.util.PasswordGenerator;
@@ -66,6 +72,9 @@ public class AuthenticationService {
 	@Autowired
 	private RefreshTokenService refreshTokenService;
 	
+	@Autowired
+	private PasswordResetTokenRepository passwordResetTokenRepository;
+	
 	
 	  @Autowired 
 	  private PasswordEncoder passwordEncoder;
@@ -79,6 +88,7 @@ public class AuthenticationService {
 	public String registerUser(UserRegistrationRequest userRegistrationRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+		StringBuilder message = new StringBuilder();
 		String generatedPassword = passwordGenerator.generatePassword();
 		Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(userRegistrationRequest.getEmail());
 		if(optUser.isPresent())
@@ -91,18 +101,21 @@ public class AuthenticationService {
 			throw new UserRegistrationException(e.getMessage());
 		}
 		
-		
 		MailAcknowledgementDto mailAcknowledgementDto = new MailAcknowledgementDto();
 		mailAcknowledgementDto.setUserId(userRegistration.getUserId());
 		mailAcknowledgementDto.setToAddress(userRegistration.getEmail());
 		mailAcknowledgementDto.setTypeOfMail("AccountCreation");
 		mailAcknowledgementDto.setSubject("New Account Created");
 		mailAcknowledgementDto.setFromAddress(fromAddress);
-		mailManagerService.sendAccountCreatedAcknowledgeMail(mailAcknowledgementDto,generatedPassword);
+		Boolean sendAccountCreatedAcknowledgeMail = mailManagerService.sendAccountCreatedAcknowledgeMail(mailAcknowledgementDto,generatedPassword);
+		
+		if(sendAccountCreatedAcknowledgeMail)
+		message.append("User Registered successfully");
+		
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		return "User Registered successfully";
+		return message.toString();
 	}
 	
 	
@@ -114,12 +127,12 @@ public class AuthenticationService {
 	   Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
 	
 	   SecurityContextHolder.getContext().setAuthentication(authentication);
-	   String athenticationToken = jwtProvider.generateToken(authentication);
+	   String authenticationToken = jwtProvider.generateToken(authentication);
 	    
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 	   return AuthenticationResponse.builder()
-			   .athenticationToken(athenticationToken)
+			   .authenticationToken(authenticationToken)
 			   .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
 			   .userName(loginRequest.getUserName())
 			   .refreshToken(refreshTokenService.generateRefreshToken().getToken())
@@ -140,13 +153,11 @@ public class AuthenticationService {
 		 logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		 return AuthenticationResponse.builder()
-				  .athenticationToken(token)
+				  .authenticationToken(token)
 				  .refreshToken(refreshTokenRequest.getRefreshToken())
 				  .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
 				  .userName(refreshTokenRequest.getUserName())
-				  .build();
-			
-				 
+				  .build();	 
 	}
 	 
 	  @Transactional(readOnly = true)
@@ -165,6 +176,102 @@ public class AuthenticationService {
 				.lastName(userRegistrationRequest.getLastName())
 				.email(userRegistrationRequest.getEmail())
 				.build();
+	}
+
+
+
+	public String verifyUserExistsORNot(String username) {
+		 String existsOrNot="";
+		 Optional<UserRegistration> optUserRegistration = userRegistrationRepository.findByEmail(username);
+	     if(optUserRegistration.isPresent())
+	     {
+	    	 existsOrNot+="exists";
+	     }else {
+	    	 existsOrNot+="not exists";
+	     }
+		return existsOrNot;
+	}
+
+
+
+	public String  forgotPassword(String email) {
+		 logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+        StringBuilder message =new StringBuilder();
+		Optional<UserRegistration> optEmail = userRegistrationRepository.findByEmail(email);
+		PasswordResetToken passwordResetToken = new PasswordResetToken();
+		String token =UUID.randomUUID().toString();
+		passwordResetToken.setToken(token);
+		passwordResetToken.setUserRegistration(optEmail.get());
+		LocalDateTime now = LocalDateTime.now();
+		passwordResetToken.setExpiryDate(now);
+		
+		try {
+		    passwordResetTokenRepository.save(passwordResetToken);
+		}catch (Exception e) {
+			throw new TechLearnException(e.getMessage());
+		}
+		
+		
+		MailAcknowledgementDto mailAcknowledgementDto = new MailAcknowledgementDto();
+		mailAcknowledgementDto.setUserId(optEmail.get().getUserId());
+		mailAcknowledgementDto.setToAddress(optEmail.get().getEmail());
+		mailAcknowledgementDto.setTypeOfMail("ForgotPassword");
+		mailAcknowledgementDto.setSubject("Forgot Password");
+		mailAcknowledgementDto.setFromAddress(fromAddress);
+
+		Boolean sendForgotPasswordMail = mailManagerService.sendForgotPasswordMail(mailAcknowledgementDto,token);
+		if(sendForgotPasswordMail)
+		{
+			message.append("Forgot password generated successfully");
+		}else {
+			message.append("Fail to generate forgot password");
+		}
+		
+		 logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+
+		return message.toString();
+	}
+
+
+
+	public String changepassword(String updatedpassword,String token) {
+		
+		   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+		   PasswordResetToken passwordResetToken=null;
+		   LocalDateTime currentDate=null;
+		   LocalDateTime expirationDate =null;
+		   Boolean flag=false;
+		   String message ="";
+		   Optional<PasswordResetToken> optToken = passwordResetTokenRepository.findByToken(token);
+		     
+		     if(optToken.isPresent()) {
+		        passwordResetToken = optToken.get();
+		        expirationDate = passwordResetToken.getExpiryDate();
+		        currentDate = LocalDateTime.now();
+		        long hours = ChronoUnit.HOURS.between(currentDate, expirationDate);
+		        logger.info("hours...."+hours);
+		        
+		        if(hours>=24) {
+		          throw new TechLearnException("token expired");
+		        }else {
+		        	UserRegistration userRegistration = passwordResetToken.getUserRegistration();
+		        	userRegistration.setPassword(passwordEncoder.encode(updatedpassword));
+		        	userRegistrationRepository.save(userRegistration);
+		        	
+		        	flag=true;
+		        }
+		        
+		     }
+		     
+		     if(flag==true)
+		     {
+		    	 passwordResetTokenRepository.deleteByToken(token);
+		    	 message+="pssword updated successfully";
+		     }
+		     
+			 logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+
+		     return message;
 	}
 	
 	

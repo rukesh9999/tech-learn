@@ -51,18 +51,30 @@ public class MailManagerService {
 	
 	public Boolean sendAccountCreatedAcknowledgeMail(MailAcknowledgementDto mailAcknowledgementDto,String generatedPassword)
 	{
-		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-
-		Boolean status=false;	
+		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
 		String  html = mailBuilder.buildRegistration(mailAcknowledgementDto.getUserId(),generatedPassword);
 		mailAcknowledgementDto.setBody(html);
 		this.saveMailDetailsBeforeSend(mailAcknowledgementDto);
-		this.sendMail(mailAcknowledgementDto);	
+		Boolean sendMailStatus = this.sendMail(mailAcknowledgementDto);	
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-        return status;
+        return sendMailStatus;
 	}
 	
+	
+	public Boolean sendForgotPasswordMail(MailAcknowledgementDto mailAcknowledgementDto,String token)
+	{
+		 logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+         
+         String html = mailBuilder.buildForgotPasswordMail(mailAcknowledgementDto.getUserId(),token);
+		 mailAcknowledgementDto.setBody(html);
+		 this.saveMailDetailsBeforeSend(mailAcknowledgementDto);
+		 Boolean sendMailStatus = this.sendMail(mailAcknowledgementDto);
+		
+		 logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+
+		 return  sendMailStatus;
+	}
 	
 	
 	public Boolean sendTechnologyAcknowledgeRelatedMail(MailAcknowledgementDto mailAcknowledgementDto,Technoloy technoloy)
@@ -72,10 +84,10 @@ public class MailManagerService {
 		
 		mailAcknowledgementDto.setBody(html);
 		this.saveMailDetailsBeforeSend(mailAcknowledgementDto);
-		Boolean status = this.sendMail(mailAcknowledgementDto);
+		Boolean sendMailStatus = this.sendMail(mailAcknowledgementDto);
 		
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-        return status;
+        return sendMailStatus;
 	}
 	
 	
