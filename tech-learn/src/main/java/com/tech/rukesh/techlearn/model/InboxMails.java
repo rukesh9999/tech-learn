@@ -3,6 +3,7 @@
  */
 package com.tech.rukesh.techlearn.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -65,7 +66,7 @@ public class InboxMails {
 	
 	
 	@Column(name ="mail_sent_date",unique =false,nullable =false)
-	private Date mailSentDate;
+	private LocalDateTime mailSentDate;
 	
 	@Column(name ="converted_to_technology",unique =false,nullable =false)
 	private boolean convertedToTechnology;

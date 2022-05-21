@@ -3,6 +3,7 @@
  */
 package com.tech.rukesh.techlearn.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Temporal;
@@ -45,7 +46,7 @@ public class TechnologyCommentsRequest {
    	@Temporal(TemporalType.TIMESTAMP)
 	@Future(message ="expectedCompletionDate must be future Date")
 	@NotNull(message ="expectedCompletionDate is required")
-	private Date expectedCompletionDate;
+	private LocalDateTime expectedCompletionDate;
 	
 	@NotBlank(message ="comment is required")
 	private String comment;

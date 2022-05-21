@@ -16,6 +16,6 @@ public interface TechnologyRepository extends PagingAndSortingRepository<Technol
 	String getTechnologyCodeById();
 	
 	
-	Integer countBystatusMainId(Integer statusId);
+	Integer countBystatusMainIdAndUserRegistrationUserId(Integer statusId,Integer userId);
 			
 }

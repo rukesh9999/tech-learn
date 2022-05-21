@@ -123,12 +123,18 @@ public class AuthenticationService {
 	public AuthenticationResponse login(LoginRequest loginRequest)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
-
+       String fullName="";
+       Integer userId =null;
 	   Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
 	
 	   SecurityContextHolder.getContext().setAuthentication(authentication);
 	   String authenticationToken = jwtProvider.generateToken(authentication);
-	    
+	   Optional<UserRegistration> optUser = userRegistrationRepository.findByEmail(loginRequest.getUserName());
+       if(optUser.isPresent())
+       {
+    	   fullName =   optUser.get().getFirstName()+"   "+optUser.get().getLastName();
+    	   userId = optUser.get().getUserId();      
+    	}
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 	   return AuthenticationResponse.builder()
@@ -136,6 +142,8 @@ public class AuthenticationService {
 			   .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
 			   .userName(loginRequest.getUserName())
 			   .refreshToken(refreshTokenService.generateRefreshToken().getToken())
+			   .fullName(fullName)
+			   .userId(userId)
 			   .build();
 			   
 			  
@@ -265,7 +273,7 @@ public class AuthenticationService {
 		     
 		     if(flag==true)
 		     {
-		    	 passwordResetTokenRepository.deleteByToken(token);
+		    	 passwordResetTokenRepository.delete(passwordResetToken);
 		    	 message+="pssword updated successfully";
 		     }
 		     

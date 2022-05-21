@@ -3,6 +3,7 @@
  */
 package com.tech.rukesh.techlearn.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -46,7 +47,7 @@ public class InboxMailsResponse {
 	
 	private String toAdddress;
 	
-	private Date mailSentDate;
+	private LocalDateTime mailSentDate;
 	
 	private boolean autoConvertToTechnology;
 	

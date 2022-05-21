@@ -94,11 +94,11 @@ public class TechnoloyController {
 		
 	}
 	
-	@GetMapping("/dashboard/count")
-	public ResponseEntity<TechnologyStatusResponse> getDashBoardCount()
+	@GetMapping("/dashboard/count/{userId}")
+	public ResponseEntity<TechnologyStatusResponse> getDashBoardCount(@PathVariable("userId")Integer userId)
 	{
 	   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
-	   TechnologyStatusResponse technoloyResponse =  technoloyService.getDashBoardCount();
+	   TechnologyStatusResponse technoloyResponse =  technoloyService.getDashBoardCount(userId);
 	   logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
        return  new ResponseEntity<TechnologyStatusResponse>(technoloyResponse,HttpStatus.OK);
 	}

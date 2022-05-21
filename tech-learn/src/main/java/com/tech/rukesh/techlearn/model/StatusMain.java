@@ -1,5 +1,6 @@
 package com.tech.rukesh.techlearn.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -47,10 +48,10 @@ public class StatusMain {
     private String description;
     
     @Column(name="created_date",unique =false,nullable = false,length =150)
-    private Date createdDate;
+    private LocalDateTime createdDate;
     
     @Column(name="modified_date",unique =false,nullable = false,length =150)
-    private Date modifiedDate;
+    private LocalDateTime modifiedDate;
     
     
     

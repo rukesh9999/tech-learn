@@ -1,5 +1,6 @@
 package com.tech.rukesh.techlearn.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -51,10 +52,10 @@ public class Technoloy {
 	private String  name;
     
     @Column(name = "created_date",unique =false,nullable = false,length =100)
-    private Date createdDate;
+    private LocalDateTime createdDate;
     
     @Column(name = "modified_date",unique =false,nullable = false,length =100)
-    private Date modifiedDate;
+    private LocalDateTime modifiedDate;
     
     @Lob
     @Column(name="description",unique = false,nullable =false,length =65536)   
@@ -62,7 +63,7 @@ public class Technoloy {
     
 	
     @Column(name ="expected_completion_date",unique = false,nullable =false,length =100)
-    private Date expectedCompletionDate;
+    private LocalDateTime expectedCompletionDate;
     
    
     @Column(name="total_time_to_complete",unique = false,nullable =false,length =50)

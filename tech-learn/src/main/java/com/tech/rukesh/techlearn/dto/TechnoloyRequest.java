@@ -1,5 +1,6 @@
 package com.tech.rukesh.techlearn.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Temporal;
@@ -33,11 +34,10 @@ public class TechnoloyRequest {
 	@NotBlank(message ="Description is Required")
 	private String description;
 	
-	@JsonFormat(pattern ="dd-MM-yyyy HH:mm:ss")
-   	@Temporal(TemporalType.TIMESTAMP)
+	
 	@Future(message = "expectedCompletionDate must be Future Date")
 	@NotNull(message ="expectedCompletionDate is required")
-	private Date expectedCompletionDate;
+	private LocalDateTime expectedCompletionDate;
 	
 	
 }

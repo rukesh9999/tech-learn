@@ -5,6 +5,8 @@ package com.tech.rukesh.techlearn.batchjob;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -136,14 +138,16 @@ public class MailReadingDailyLogic {
 			 message.setFlag(Flags.Flag.SEEN, true);
 			 
 			 InboxMailsDto inboxMailsDto = new InboxMailsDto();
-			 
+			 LocalDateTime messageSentDate = LocalDateTime.ofInstant(message.getSentDate().toInstant(),
+                     ZoneId.systemDefault());
+
 			 inboxMailsDto.setConvertedToTechnology(false);
 			 inboxMailsDto.setUserId(batchJobSettings.getUserRegistration().getUserId());
 			 inboxMailsDto.setSubject(message.getSubject());
 			 inboxMailsDto.setDescription(message.getSubject());
 			 inboxMailsDto.setFromAddress(message.getFrom()[0].toString());
 			 inboxMailsDto.setToAdddress(batchJobSettings.getUserName());
-			 inboxMailsDto.setMailSentDate(message.getSentDate());
+			 inboxMailsDto.setMailSentDate(messageSentDate);
 		
 			 Integer inboxMailsId =  inboxMailsService.saveInboxMailsFromBatchJob(inboxMailsDto);
 			 

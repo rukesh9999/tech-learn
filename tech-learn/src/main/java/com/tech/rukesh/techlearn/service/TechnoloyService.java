@@ -5,8 +5,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -266,7 +268,7 @@ public class TechnoloyService {
 				.createdDate(TechnoloyResponse.getCreatedDate())
 				.expectedCompletionDate(technologyCommentsRequest.getExpectedCompletionDate())
 				.totalTimeToComplete(totaltimeString)
-				.modifiedDate(new Date(System.currentTimeMillis()))
+				.modifiedDate(LocalDateTime.now())
 				.statusMain(statusMain)
 				.userRegistration(userRegistration)
 		        .build();	
@@ -312,9 +314,9 @@ public class TechnoloyService {
 		
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
 	
-		Date createdDate =new Date(System.currentTimeMillis());
-		Date modifieddate = new Date(System.currentTimeMillis());
-		Date ExpectedCompletionDate  =  technoloyRequest.getExpectedCompletionDate();
+		LocalDateTime createdDate =LocalDateTime.now();
+		LocalDateTime modifieddate = LocalDateTime.now();
+		LocalDateTime ExpectedCompletionDate  =  technoloyRequest.getExpectedCompletionDate();
 		String totaltimeString = calculateTotalTime(createdDate,ExpectedCompletionDate);
 		
 		UserRegistration userRegistration =   authenticationService.getCurrentUser();
@@ -342,16 +344,21 @@ public class TechnoloyService {
 	
 	
 
-	private String calculateTotalTime(Date startDate , Date endDate) {
+	private String calculateTotalTime(LocalDateTime startDate , LocalDateTime endDate) {
 		
 		 logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		 
-		 LocalDate startdate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		 LocalDate ExpectedCompletionDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		 Period period =  Period.between(startdate, ExpectedCompletionDate);
-		 int years = period.getYears();
-		 int months = period.getMonths();
-		 int days = period.getDays();
+		 //LocalDate startdate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		 //LocalDate ExpectedCompletionDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		 long years = ChronoUnit.YEARS.between(startDate, endDate);
+	     long months = ChronoUnit.MONTHS.between(startDate, endDate);
+	     long days = ChronoUnit.DAYS.between(startDate, endDate);
+	     
+		// Period period =  Period.between(startdate, ExpectedCompletionDate);
+		// int years = period.getYears();
+		// int months = period.getMonths();
+		// int days = period.getDays();
+	     
 		 String yearsappend="";
 		 String Monthsappend="";
 		 String Daysappend="";
@@ -515,11 +522,11 @@ public class TechnoloyService {
 	}
 
 
-	public TechnologyStatusResponse getDashBoardCount() {
+	public TechnologyStatusResponse getDashBoardCount(Integer userId) {
 		
-		Integer newStatusCount = technologyRepository.countBystatusMainId(StatusMap.New);
-		Integer inProgressStatusCount = technologyRepository.countBystatusMainId(StatusMap.InProgress);
-		Integer closedStatusCount = technologyRepository.countBystatusMainId(StatusMap.Closed);
+		Integer newStatusCount = technologyRepository.countBystatusMainIdAndUserRegistrationUserId(StatusMap.New,userId);
+		Integer inProgressStatusCount = technologyRepository.countBystatusMainIdAndUserRegistrationUserId(StatusMap.InProgress,userId);
+		Integer closedStatusCount = technologyRepository.countBystatusMainIdAndUserRegistrationUserId(StatusMap.Closed,userId);
 		
 		TechnologyStatusResponse technologyStatusResponse =new TechnologyStatusResponse();
 		technologyStatusResponse.setClosedStatusCount(closedStatusCount);
@@ -573,15 +580,16 @@ public class TechnoloyService {
 		  if(!userRegistrationOpt.isPresent())
 	      throw new NoSuchUserExistsException("User does not exists");
 		  
-		  Date createdDate = new Date(System.currentTimeMillis());
+		  LocalDateTime createdDate = LocalDateTime.now();
 		  
-		  Date modifiedDate = new Date(System.currentTimeMillis());
+		  LocalDateTime  modifiedDate = LocalDateTime.now();
 		  
-		  Calendar calender = Calendar.getInstance();
-		  calender.setTime(createdDate);
-		  calender.add(Calendar.DAY_OF_MONTH,31);
-		  Date  expectedCompletionDate =  calender.getTime();
-		  
+//		  Calendar calender = Calendar.getInstance();
+//		  calender.setTime(createdDate);
+//		  calender.add(Calendar.DAY_OF_MONTH,31);
+//		  Date  expectedCompletionDate =  calender.getTime();
+		  LocalDateTime  expectedCompletionDate = LocalDateTime.now().plusDays(31);
+
 		  String timeToComplete = calculateTotalTime(createdDate,expectedCompletionDate);
 		  
 	      Optional<StatusMain> statusMainOpt  = statusMainRepository.findById(StatusMap.New);	

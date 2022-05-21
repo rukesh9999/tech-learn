@@ -1,5 +1,6 @@
 package com.tech.rukesh.techlearn.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -22,9 +23,9 @@ public class TechnoloyResponse {
 	private String  code;
 	private String name;	
 	private String description;
-	private Date createdDate;
-	private Date modifiedDate;
-	private Date expectedCompletionDate;
+	private LocalDateTime createdDate;
+	private LocalDateTime modifiedDate;
+	private LocalDateTime expectedCompletionDate;
 	private String totalTimeToComplete;
 	private String statusName;
 	private String CreatedBy;

@@ -3,6 +3,7 @@
  */
 package com.tech.rukesh.techlearn.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -36,7 +37,7 @@ public class InboxMailsDto {
 	
 	private String toAdddress;
 	
-	private Date mailSentDate;
+	private LocalDateTime mailSentDate;
 	
 	private boolean convertedToTechnology;
 	

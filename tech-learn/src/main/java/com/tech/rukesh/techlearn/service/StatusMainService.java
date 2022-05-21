@@ -1,5 +1,6 @@
 package com.tech.rukesh.techlearn.service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -103,7 +104,7 @@ public class StatusMainService {
     	statusMain.setName(statusMainUpdateRequest.getName());
     	statusMain.setDescription(statusMainUpdateRequest.getDescription());
     	statusMain.setCreatedDate(statusmaindbdto.getCreatedDate());
-    	statusMain.setModifiedDate(new Date(System.currentTimeMillis()));
+    	statusMain.setModifiedDate(LocalDateTime.now());
     	try {
     		statusMain = statusMainRepository.save(statusMain);
     	}catch (Exception e) {
@@ -119,8 +120,8 @@ public class StatusMainService {
 		return StatusMain.builder()
 				.name(statusMainRequest.getName())
 				.description(statusMainRequest.getDescription())
-				.createdDate(new Date(System.currentTimeMillis()))
-				.modifiedDate(new Date(System.currentTimeMillis()))
+				.createdDate(LocalDateTime.now())
+				.modifiedDate(LocalDateTime.now())
 				.build();
 	}
 

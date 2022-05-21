@@ -1,5 +1,6 @@
 package com.tech.rukesh.techlearn.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.validation.constraints.NotBlank;
@@ -26,8 +27,8 @@ public class StatusMainResponse {
 	@NotBlank(message ="Description is Required")
 	private String description;
 	
-	private Date createdDate;
+	private LocalDateTime createdDate;
 	
-	private Date modifiedDate;
+	private LocalDateTime modifiedDate;
 	
 }

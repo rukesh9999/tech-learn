@@ -109,8 +109,8 @@ public class AuthenticationController {
 		  
 	  }
 	  
-	  @GetMapping("/changepassword/{updatedpassword}")
-	  public ResponseEntity<String> changePassword(@PathVariable("updatedpassword")String updatedpassword,@RequestParam("token")String token)
+	  @GetMapping("/changepassword/{updatedpassword}/{token}")
+	  public ResponseEntity<String> changePassword(@PathVariable("updatedpassword")String updatedpassword,@PathVariable("token")String token)
 	  {
 		   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		   
