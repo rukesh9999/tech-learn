@@ -53,7 +53,7 @@ public class MailReadingDailyLogic {
 	private TechnoloyService technoloyService;
 	
 	
-    //@Scheduled(fixedRate =5000)
+   // @Scheduled(fixedRate =5000)
 	public void getAllBatchJobSettings()
 	{
 		List<BatchJobSettings>   listOfBatchJobSettings = (List<BatchJobSettings>) batchJobSettingsRepository.findAll();

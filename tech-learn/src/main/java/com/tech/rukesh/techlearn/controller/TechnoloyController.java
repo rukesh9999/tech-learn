@@ -63,11 +63,11 @@ public class TechnoloyController {
 	}
 	
 	
-	@GetMapping("/get/{id}")
-	public ResponseEntity<TechnoloyResponse> getTechnologyById(@PathVariable("id")Integer id)
+	@GetMapping("/get/{technologyId}")
+	public ResponseEntity<TechnoloyResponse> getTechnologyById(@PathVariable("technologyId")Integer technologyId)
 	{
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());	
-		TechnoloyResponse technoloyResponse = technoloyService.getTechnologyById(id);
+		TechnoloyResponse technoloyResponse = technoloyService.getTechnologyById(technologyId);
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 		return new ResponseEntity<TechnoloyResponse>(technoloyResponse,HttpStatus.OK);
 

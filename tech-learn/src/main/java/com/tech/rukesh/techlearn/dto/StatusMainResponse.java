@@ -20,6 +20,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @Data
 public class StatusMainResponse {
+	
+	private Integer statusMainId;
 
 	@NotBlank(message ="Name is Required")
 	private String name;

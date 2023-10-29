@@ -130,6 +130,7 @@ public class StatusMainService {
 	public StatusMainResponse  mapToStatusMainResponse(StatusMain statusMain) {
 		
 		return StatusMainResponse.builder()
+			   .statusMainId(statusMain.getId())
 			   .name(statusMain.getName())
 			   .description(statusMain.getDescription())
 			   .createdDate(statusMain.getCreatedDate())

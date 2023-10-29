@@ -32,8 +32,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MailBuilder {
 
-	@Value("${app.url}")
-	private String url;
+	@Value("${app.forgot.password.url}")
+	private String forgotPasswordURL;
+	
+	@Value("${app.login.url}")
+	private String loginURL;
 	
 	@Autowired
 	private TemplateEngine templateEngine;
@@ -63,9 +66,9 @@ public class MailBuilder {
 		context.setVariable("lastName", userregistration.getLastName());
 		context.setVariable("email", userregistration.getEmail());
 		context.setVariable("password", generatedPassword);
-		logger.info("url ..."+url);
+		logger.info("url ..."+loginURL);
 
-		context.setVariable("url", url);
+		context.setVariable("url",loginURL);
 		
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
@@ -102,7 +105,7 @@ public class MailBuilder {
 		context.setVariable("totaltimetocomplete", technoloy.getTotalTimeToComplete());
 		context.setVariable("status",optStatus.get().getName() );
 		context.setVariable("comments",comments);
-		
+		context.setVariable("url",loginURL);
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
 		return templateEngine.process(fileName, context);
@@ -118,7 +121,7 @@ public class MailBuilder {
 		context.setVariable("firstName", userregistration.getFirstName());
 		context.setVariable("lastName", userregistration.getLastName());
 		context.setVariable("token",token);
-		String forgotpasswordurl = url+"?token="+token;
+		String forgotpasswordurl = forgotPasswordURL+"?token="+token;
 		context.setVariable("url", forgotpasswordurl);
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 

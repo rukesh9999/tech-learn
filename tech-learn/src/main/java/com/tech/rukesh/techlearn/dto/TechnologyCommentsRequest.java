@@ -33,8 +33,8 @@ import lombok.ToString;
 @AllArgsConstructor
 public class TechnologyCommentsRequest {
 	
-	@NotNull(message ="id is Required")
-	private Integer id;
+	@NotNull(message ="technologyId is Required")
+	private Integer technologyId;
 	
 	@NotBlank(message ="Name is Required")
 	private String name;
@@ -42,7 +42,7 @@ public class TechnologyCommentsRequest {
 	@NotBlank(message ="Description is Required")
 	private String description;
 	
-	@JsonFormat(pattern ="dd-MM-yyyy HH:mm:ss")
+	//@JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss")
    	@Temporal(TemporalType.TIMESTAMP)
 	@Future(message ="expectedCompletionDate must be future Date")
 	@NotNull(message ="expectedCompletionDate is required")

@@ -115,6 +115,8 @@ public class MailManagerService {
 			status=true;
 		}catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Exception occured ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
+
 			status=false;
 		}
 		

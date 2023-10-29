@@ -244,7 +244,7 @@ public class TechnoloyService {
 		logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());			
 		StatusMain statusMain=null;
 		
-		TechnoloyResponse TechnoloyResponse = getTechnologyById(technologyCommentsRequest.getId());
+		TechnoloyResponse TechnoloyResponse = getTechnologyById(technologyCommentsRequest.getTechnologyId());
 		
 		if(technologyCommentsRequest.getStatusId()!=null) {
 		 Optional<StatusMain> statusMainopt  = statusMainRepository.findById(technologyCommentsRequest.getStatusId());
@@ -261,7 +261,7 @@ public class TechnoloyService {
 		logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());		
 
 		return Technoloy.builder()
-				.id(technologyCommentsRequest.getId())
+				.id(technologyCommentsRequest.getTechnologyId())
 				.code(TechnoloyResponse.getCode())
 				.name(technologyCommentsRequest.getName())
 				.description(technologyCommentsRequest.getDescription())
@@ -292,6 +292,7 @@ public class TechnoloyService {
 		String fullName = firstName+lastName;
 		
 		return TechnoloyResponse.builder()
+				.technologyId(techsave.getId())
 				.name(techsave.getName())
 				.code(techsave.getCode())
 				.createdDate(techsave.getCreatedDate())
@@ -607,6 +608,11 @@ public class TechnoloyService {
 	    		  .build();
 		     
     }
+    
+    
+    
+    
+    
 	
 	
 }

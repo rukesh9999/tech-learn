@@ -19,7 +19,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Data
 public class TechnoloyResponse {
-	
+	private Integer technologyId;
 	private String  code;
 	private String name;	
 	private String description;

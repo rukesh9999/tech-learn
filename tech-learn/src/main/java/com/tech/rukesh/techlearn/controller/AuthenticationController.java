@@ -101,11 +101,11 @@ public class AuthenticationController {
 	  {
 		   logger.info("Entered into ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		   authenticationService.forgotPassword(email);
+		   String status = authenticationService.forgotPassword(email);
 		  
 		   logger.info("End of ..."+Thread.currentThread().getStackTrace()[1].getMethodName()+"... IN... "+this.getClass().getName());
 
-		   return null;
+		   return new ResponseEntity<String>(status,HttpStatus.OK);
 		  
 	  }
 	  
